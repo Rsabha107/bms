@@ -19,11 +19,26 @@
         </div>
     </div>
     <h3 class="text-white mb-4">{{ $parent_menu }}</h3>
+
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="row g-4 mb-5">
         @foreach ($services as $service)
             @php
                 $badge_bg_color = $service->available_slots > 0 ? 'success' : 'danger';
-                $form_action = $service->available_slots > 0 ? "{{ route('customer.booking.cart.store') }}" : '#';
+                $form_action = $service->available_slots > 0 ? "route('customer.booking.cart.store')" : '#';
                 $disabled = $service->available_slots > 0 ? '' : 'disabled';
                 //    $show_form = $service->available_slots > 0 ? true : false;
             @endphp
@@ -32,20 +47,20 @@
                         <div class="card overflow-hidden h-100">
                             <div class="position-relative">
                                 <div class="bg-secondary-lighter" style="height: 100px">
-                                    {{-- <span
-                                        class="badge text-bg-success position-absolute top-0 end-0 z-2 mt-1 mt-sm-2 me-2 me-sm-2">{{ $service->available_slots }}
+                                    <span
+                                        class="badge text-bg-{{ $badge_bg_color }} position-absolute top-0 end-0 z-2 mt-1 mt-sm-2 me-2 me-sm-2">{{ $service->available_slots }}
                                         available
-                                    </span> --}}
-                                    <h4 class="text-body px-3 py-3">{{ $service->title }}</h4>
+                                    </span>
+                                    <h5 class="text-body px-3 py-7">{{ $service->title }}</h5>
                                 </div>
                             </div>
                             <div class="card-body d-flex flex-column justify-content-between mb-3">
                                 <div>
                                     {{-- <p class="text-body-tertiary mb-4">Daily task</p> --}}
-                                    <span class="badge text-bg-{{ $badge_bg_color }} mb-3">{{ $service->available_slots }}
+                                    {{-- <span class="badge text-bg-{{ $badge_bg_color }} mb-3">{{ $service->available_slots }}
                                         available
-                                    </span>
-                                    <form action="{{ $form_action }}" method="POST" id="cart-form">
+                                    </span> --}}
+                                    <form action="{{ route('customer.booking.cart.store') }}" method="POST" id="cart-form">
                                         @csrf
                                         <input type="hidden" name="service_id" value="{{ $service->id }}">
                                         <input type="hidden" name="unit_price" value="{{ $service->unit_price }}">
@@ -55,7 +70,8 @@
                                                 <input class="form-control text-center input-spin-none " style="width:50px;"
                                                     type="number" name="quantity" min="1" value="1"
                                                     max="{{ $service->available_slots }}" {{ $disabled }}>
-                                                <button class="btn btn-phoenix-primary px-3 border-0 ms-3" {{ $disabled }}>Reserve
+                                                <button class="btn btn-phoenix-success border-0 ms-3"
+                                                    {{ $disabled }}>Reserve
                                                     Now</button>
                                             </div>
                                         </div>
@@ -118,7 +134,7 @@
                                     </div> --}}
 
                                 </div>
-                                {{-- <div class="d-flex gap-4">
+                                {{-- <div class="d-flex gap-4 mt-3">
                                     <h5 class="text-body"><span
                                             class="fa-solid fa-list-check text-body-tertiary me-1"></span>44</h5>
                                     <h5 class="text-body"><span
@@ -127,37 +143,13 @@
                                             class="fa-solid fa-calendar-xmark text-body-tertiary me-1"></span>3</h5>
                                 </div> --}}
                             </div>
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            <button class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal"
                                 data-bs-target="#descModal{{ $service->id }}">
                                 Read more
                             </button>
                         </div>
                     </a>
                 </div>
-
-                {{-- <div class="card flex-fill border border-primary">
-                    <span
-                        class="badge text-bg-success position-absolute top-0 end-0 z-2 mt-1 mt-sm-2 me-2 me-sm-2">{{ $service->available_slots }}
-                        available
-                    </span>
-                    <div style="height: 200px;">
-                        <div class="card-body mt-3" style="height: 200px;">
-                            <h4 class="card-title">{{ $service->title }} </h4>
-                            <div class="pt-0 px-1 px-md-2 px-lg-3 pb-2">
-                                <div class="h6 mb-2">QR {{ $service->unit_price }}</div>
-                                <h3 class="fs-sm lh-base mb-0">
-                                    <a class="hover-effect-underline fw-normal" href="#">
-                                        <h6 class="fw-normal">{{ $service->title }}</h6>
-                                    </a>
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                        data-bs-target="#descModal{{ $service->id }}">
-                        Read more
-                    </button>
-                </div> --}}
             </div>
             <div class="modal fade" id="descModal{{ $service->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -173,69 +165,6 @@
                 </div>
             </div>
         @endforeach
-        {{-- <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
-            <div class="card border border-secondary">
-                <div class="card-body">
-                    <h4 class="card-title">Secondary Border Card </h4>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                        card's content.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
-            <div class="card border border-success">
-                <div class="card-body">
-                    <h4 class="card-title">Success Border Card </h4>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                        card's content.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
-            <div class="card border border-danger">
-                <div class="card-body">
-                    <h4 class="card-title">Danger Border Card </h4>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                        card's content.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
-            <div class="card border border-warning">
-                <div class="card-body">
-                    <h4 class="card-title">Warning Border Card </h4>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                        card's content.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
-            <div class="card border border-info">
-                <div class="card-body">
-                    <h4 class="card-title">Info Border Card </h4>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                        card's content.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
-            <div class="card border border-light">
-                <div class="card-body">
-                    <h4 class="card-title">Light Border Card </h4>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                        card's content.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
-            <div class="card border border-dark">
-                <div class="card-body">
-                    <h4 class="card-title">Dark Border Card </h4>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                        card's content.</p>
-                </div>
-            </div>
-        </div> --}}
     </div>
 @endsection
 

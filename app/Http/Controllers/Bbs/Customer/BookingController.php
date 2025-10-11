@@ -27,6 +27,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -58,144 +60,6 @@ class BookingController extends Controller
             compact('services', 'menus')
         );
     }
-
-    public function showServices($id)
-    {
-        Log::info('CustomerBookingController::showServices id: ' . $id);
-
-        // You said you don't want to use DeliveryBooking (old project),
-        // so we'll just return an empty collection to keep things safe.
-        // $bookings = collect();
-        // $bookings = BroadcastBooking::with('service')->where('created_by', Auth::user()->id)
-        //     ->where('event_id', session()->get('EVENT_ID'))
-        //     // ->where('venue_id', session()->get('VENUE_ID'))
-        //     ->get();
-        forget_menu_session();
-        $parent_menu_db = MenuItem::find($id);
-        $parent_menu = $parent_menu_db->title;
-        $services = BroadcastService::where('menu_item_id', $id)->get();
-        $menus = MenuItem::whereNull('parent_id')
-            ->with('children.children') // recursive depth
-            ->orderBy('order_number')
-            ->get();
-
-        session()->put($parent_menu_db->link, 'active');
-        if ($parent_menu_db->parent) {
-            session()->put($parent_menu_db->parent->link, 'active');
-        }
-        
-        Log::info('session()->all(): ' . json_encode(session()->all()));   
-
-        return view(
-            'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'parent_menu')
-        );
-    }
-    public function listService()
-    {
-        $parent_menu = 'All Services';
-        $services = BroadcastService::all();
-        $menus = MenuItem::whereNull('parent_id')
-            ->with('children.children') // recursive depth
-            ->orderBy('order_number')
-            ->get();
-
-        return view(
-            'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'parent_menu')
-        );
-    }
-
-    public function build_menu($parent_id = null)
-    {
-        $menus = MenuItem::whereNull('parent_id')
-            ->with('children.children') // recursive depth
-            ->orderBy('order_number')
-            ->get();
-
-            // dd($menu);
-        return view('/bbs/customer/booking/list-menu', compact('menus'));
-    }
-    // public function customerList()
-    // {
-    //     $services = BroadcastService::all();
-    //     return view('bbs.customer.booking.list', compact('services'));
-    // }
-
-
-    public function dashboard()
-    {
-        return view('mds.customer.dashboard.index');
-    }
-
-    // public function listEvent(Request $request)
-    // {
-    //     $start = date('Y-m-d', strtotime($request->start));
-    //     $end = date('Y-m-d', strtotime($request->end));
-
-    //     // $events = DeliverySchedulePeriod::where('venue_id', $id)
-    //     //     ->where('available_slots', '>', 0)
-    //     //     ->distinct()
-    //     //     ->get('period_date')
-
-    //     //     // dd($events);
-    //     //     ->map(fn($item) => [
-    //     //         // 'id' => $item->id,
-    //     //         // 'title' => $item->period.' - ('.$item->available_slots.' slots)',
-    //     //         'start' => $item->period_date,
-    //     //         'end' => date('Y-m-d', strtotime($item->period_date . '+1 days')),
-    //     //         // 'category' => $item->category,
-    //     //         'className' => ['bg-warning']
-    //     //     ]);
-
-    //     // Log::info('BookingController::listEvent carbon yesterday: ' . Carbon::previous('2025-11-01')->setTime(17, 0, 0)->toDateTimeString());
-    //     // $date = Carbon::createFromFormat('Y-m-d',  '2025-03-04');
-    //     // $prevDate = $date->subDay()->setTimeFromTimeString('17:00:00');
-    //     // $now = Carbon::now();
-    //     $t = '7';
-    //     // Log::info('BookingController::listEvent carbon this date: ' . $date);
-    //     // Log::info('BookingController::listEvent carbon this now: ' . $now);
-    //     // Log::info('today is greator than ..'. ($date->gt($now)));
-    //     // Log::info('today is less than ..'. ($date->lt($now)));
-    //     // Log::info('BookingController::listEvent carbon subDay: ' . $prevDate);
-    //     $events = BookingSlot::where('venue_id', $request->venue_id)
-    //         ->where('event_id', session()->get('EVENT_ID'))
-    //         // ->where('bookings_slots_all', '>', 0)
-    //         ->where('available_slots', '>', 0)
-    //         ->where('slot_visibility', '<=', Carbon::now())
-    //         // ->whereRaw("DATE_ADD(booking_date, INTERVAL '-0 7' DAY_HOUR) > NOW()")
-    //         ->where(function ($query) use ($t) {
-    //             $query->whereRaw("DATE_ADD(booking_date, INTERVAL '-0 $t' DAY_HOUR) > NOW()");
-    //         });
-    //     // ->where(Carbon::createFromFormat('Y-m-d','booking_date')->subDay()->setTimeFromTimeString('17:00:00')->gt(Carbon::now()))
-    //     // ->distinct()
-    //     // ->get('booking_date')
-
-    //     // if catering then include the booking slots catering slots
-    //     if (auth()->user()->hasRole('Catering')) {
-    //         $events = $events->where(function ($query) {
-    //             $query->where('bookings_slots_all', '>', '0')
-    //                 ->orWhere('bookings_slots_cat', '>', '0');
-    //         });
-    //         // if not catering then include the booking slots all slots only
-    //     } else {
-    //         $events = $events->where('bookings_slots_all', '>', '0');
-    //     }
-
-    //     $events = $events->distinct()->get('booking_date')
-    //         // dd($events);
-    //         ->map(fn($item) => [
-    //             // 'id' => $item->id,
-    //             // 'title' => $item->period.' - ('.$item->available_slots.' slots)',
-    //             'start' => $item->booking_date,
-    //             'end' => date('Y-m-d', strtotime($item->period_date . '+1 days')),
-    //             'display' => 'background',
-    //             'color' => 'green',
-    //             'className' => ['bg-seccess'],
-    //         ]);
-
-    //     return response()->json($events);
-    // }
 
     public function list()
     {
@@ -254,7 +118,7 @@ class BookingController extends Controller
                 '" id="deleteEvent" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
                 '<i class="fa-solid fa-trash text-danger"></i></a></div></div>';
 
-            $actions = $update_action . $delete_action;
+            $actions = $delete_action;
             return  [
                 'id' => $op->id,
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-9 ps-2">' .$op->id. '</div>',
@@ -276,200 +140,94 @@ class BookingController extends Controller
             "total" => $total,
         ]);
     }
-    /**
-     * Show the form for creating a new resource.
-     */
-    // public function create()
-    // {
-    //     // $schedules = DeliverySchedule::all();
-    //     // $intervals = DeliverySchedulePeriod::all();
-    //     // $venues = DeliveryVenue::all();
-    //     $venues = BookingSlot::select('venue_id', 'venue_name')
-    //         ->where('event_id', session()->get('EVENT_ID'))
-    //         ->distinct()
-    //         ->get();
-    //     $events = MdsEvent::all();
-    //     $rsps = DeliveryRsp::all();
-    //     $drivers = MdsDriver::all();
-    //     $vehicles = DeliveryVehicle::all();
-    //     $vehicle_types = DeliveryVehicleType::all();
-    //     $delivery_types = DeliveryType::all();
-    //     $cargos = DeliveryCargoType::all();
-    //     $loading_zones = DeliveryZone::all();
-    //     $clients = FunctionalArea::all();
 
-    //     return view('mds.customer.booking.create', compact(
-    //         // 'schedules',
-    //         // 'intervals',
-    //         'venues',
-    //         'events',
-    //         'rsps',
-    //         'drivers',
-    //         'vehicles',
-    //         'vehicle_types',
-    //         'delivery_types',
-    //         'cargos',
-    //         'loading_zones',
-    //         'clients'
-    //     ));
-    // }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function showServices($id)
     {
-        //
-        // dd($request);
-        $user_id = Auth::user()->id;
-        $booking = new DeliveryBooking();
+        Log::info('CustomerBookingController::showServices id: ' . $id);
 
-        $rules = [
-            'booking_date' => 'required',
-            'schedule_period_id' => 'required',
-            'venue_id' => 'required',
-            'driver_id' => 'required',
-            'vehicle_id' => 'required',
-            'vehicle_type_id' => 'required',
-            'receiver_name' => 'required',
-            'receiver_contact_number' => 'required',
-            'dispatch_id' => 'required',
-            'cargo_id' => 'required',
-            'loading_zone_id' => 'required',
-        ];
+        // You said you don't want to use DeliveryBooking (old project),
+        // so we'll just return an empty collection to keep things safe.
+        // $bookings = collect();
+        // $bookings = BroadcastBooking::with('service')->where('created_by', Auth::user()->id)
+        //     ->where('event_id', session()->get('EVENT_ID'))
+        //     // ->where('venue_id', session()->get('VENUE_ID'))
+        //     ->get();
+        forget_menu_session();
+        $parent_menu_db = MenuItem::find($id);
+        $parent_menu = $parent_menu_db->title;
+        $services = BroadcastService::where('menu_item_id', $id)->get();
+        $menus = MenuItem::whereNull('parent_id')
+            ->with('children.children') // recursive depth
+            ->orderBy('order_number')
+            ->get();
 
-        // $timeslots = DeliverySchedulePeriod::findOrFail($request->schedule_period_id);
-
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            Log::info($validator->errors());
-            $error = true;
-            $type = 'success';
-            $message = $validator->messages();
-            return redirect()->back()->withErrors($message)->withInput();
-        } else {
-
-            // check number of slots available.  if available slots = 0 then exit with a warning message.
-            // this is incase a user grabed the last slot with this user is waiting ..
-            $timeslots = BookingSlot::findOrFail($request->schedule_period_id);
-
-            if ($timeslots->available_slots > 0) {
-
-                $error = false;
-                $type = 'success';
-                $message = 'Booking created succesfully.' . $booking->id;
-
-                $booking->booking_ref_number = 'MDS' . $booking->id;
-                $booking->schedule_id =  $timeslots->delivery_schedule_id;
-                $booking->user_id =  $user_id;
-                $booking->schedule_period_id = $request->schedule_period_id;
-                $booking->booking_date = $request->booking_date;
-                $booking->event_id = session()->get('EVENT_ID');
-                // $booking->booking_date = Carbon::createFromFormat('d/m/Y', $request->booking_date)->toDateString();
-                $booking->venue_id = $request->venue_id;
-                $booking->rsp_id = $timeslots->rsp_id;
-                $booking->client_id = $request->client_id;
-                $booking->booking_party_company_name = $request->booking_party_company_name;
-                $booking->booking_party_contact_name = $request->booking_party_contact_name;
-                $booking->booking_party_contact_email = $request->booking_party_contact_email;
-                $booking->booking_party_contact_number = $request->booking_party_contact_number;
-                // $booking->delivering_party_company_name = $request->delivering_party_company_name;
-                // $booking->delivering_party_contact_number = $request->delivering_party_contact_number;
-                // $booking->delivering_party_contact_email = $request->delivering_party_contact_email;
-                $booking->driver_id = $request->driver_id;
-                $booking->vehicle_id = $request->vehicle_id;
-                $booking->vehicle_type_id = $request->vehicle_type_id;
-                $booking->receiver_name = $request->receiver_name;
-                $booking->receiver_contact_number = $request->receiver_contact_number;
-                $booking->dispatch_id = $request->dispatch_id;
-                $booking->loading_zone_id = $request->loading_zone_id;
-                $booking->cargo_id = $request->cargo_id;
-                $booking->active_flag = $request->active_flag;
-                $booking->created_by = $user_id;
-                $booking->updated_by = $user_id;
-                $booking->active_flag = 1;
-
-                $booking->save();
-            } else {
-                $error = true;
-                $type = 'error';
-                $message = 'Time slot choosing has been used please choose a different time slot.' . $booking->id;
-            }
-
-            $save_pass_pdf = $this->save_pass_pdf($booking);
-
-            if ($save_pass_pdf) {
-                $details = [
-                    'email' => 'rsabha@gmail.com',
-                    'venue' => $booking->venue->title,
-                    'booking_ref_number' => $booking->booking_ref_number,
-                    'booking_date' => \Carbon\Carbon::parse($booking->booking_date)->format('l jS \of F Y'),
-                    'booking_time_slot' => $booking->schedule->rsp_booking_slot,
-                    'filename' => $booking->booking_ref_number . '.pdf',
-                ];
-
-                Log::info('BookingController::store details: ' . json_encode($details));
-                SendNewBookingEmailJob::dispatch($details);
-            }
+        session()->put($parent_menu_db->link, 'active');
+        if ($parent_menu_db->parent) {
+            session()->put($parent_menu_db->parent->link, 'active');
         }
 
-        $notification = array(
-            'message'       => $message,
-            'alert-type'    => $type
+        Log::info('session()->all(): ' . json_encode(session()->all()));
+
+        return view(
+            'bbs.customer.booking.list-services',
+            compact('services', 'menus', 'parent_menu')
         );
+    }
+    public function listService()
+    {
+        $parent_menu = 'All Services';
+        $services = BroadcastService::all();
+        $menus = MenuItem::whereNull('parent_id')
+            ->with('children.children') // recursive depth
+            ->orderBy('order_number')
+            ->get();
 
-        // return redirect()->route('mds.customer.booking.confirmation')->with($notification)->with('data', $booking);
-        return view('mds.customer.booking.confirmation', ['data' => $booking]);
-
-
-        // return response()->json(['error' => $error, 'message' => $message]);
+        return view(
+            'bbs.customer.booking.list-services',
+            compact('services', 'menus', 'parent_menu')
+        );
     }
 
-    public function deleteBooking($id)
+    public function build_menu($parent_id = null)
     {
-        $op = BroadcastBooking::findOrFail($id);
-        $service = BroadcastService::find($op->service_id);
-        $service->available_slots = $service->available_slots + $op->quantity;
-        $service->used_slots = $service->used_slots - $op->quantity;
-        $service->save();
-        $op->delete();
+        $menus = MenuItem::whereNull('parent_id')
+            ->with('children.children') // recursive depth
+            ->orderBy('order_number')
+            ->get();
 
-        $error = false;
-        $message = 'Service deleted succesfully.';
+        // dd($menu);
+        return view('/bbs/customer/booking/list-menu', compact('menus'));
+    }
 
-        $notification = array(
-            'message'       => 'Service deleted successfully',
-            'alert-type'    => 'success'
-        );
+    public function dashboard()
+    {
+        return view('mds.customer.dashboard.index');
+    }
 
-        return redirect()->route('bbs.customer.booking.cart')->with($notification);
-        // return response()->json(['error' => $error, 'message' => $message]);
-    } // deleteBooking
 
     public function delete($id)
     {
         // LOG::info('inside delete');
-        $op = DeliveryBooking::find($id);
+        $op = BroadcastBooking::find($id);
+        $service = BroadcastService::find($op->service_id);
 
         // get the timeslot id
-        $timeslot_id = $op->schedule_period_id;
+        // $timeslot_id = $op->schedule_period_id;
         // get the timeslot
-        $timeslot = BookingSlot::find($timeslot_id);
+        // $timeslot = BookingSlot::find($timeslot_id);
 
-        $timeslot->available_slots = $timeslot->available_slots + 1;
-        $timeslot->used_slots = $timeslot->used_slots - 1;
+        $service->available_slots = $service->available_slots + 1;
+        $service->used_slots = $service->used_slots - 1;
 
-        $timeslot->save();
+        $service->save();
 
         $op->delete();
 
         $error = false;
-        $message = 'Booking deleted succesfully.';
+        $message = 'Reservation deleted succesfully.';
 
         $notification = array(
-            'message'       => 'Booking deleted successfully',
+            'message'       => 'Reservation deleted successfully',
             'alert-type'    => 'success'
         );
 
@@ -490,39 +248,7 @@ class BookingController extends Controller
         // Pass it to the Blade view
         return view('bbs.customer.booking.detail', compact('booking'));
     }
-    /**
-     * Show the form for editing the specified resource.
-     */
-    // public function edit(string $id)
-    // {
-    //     $booking = DeliveryBooking::find($id);
-    //     // $intervals = DeliverySchedulePeriod::all();
-    //     $venues = DeliveryVenue::all();
-    //     $events = MdsEvent::all();
-    //     $rsps = DeliveryRsp::all();
-    //     $drivers = MdsDriver::all();
-    //     $vehicles = DeliveryVehicle::all();
-    //     $vehicle_types = DeliveryVehicleType::all();
-    //     $delivery_types = DeliveryType::all();
-    //     $cargos = DeliveryType::all();
-    //     $loading_zones = DeliveryZone::all();
-    //     $clients = FunctionalArea::all();
 
-    //     return view('mds.customer.booking.edit', compact(
-    //         'booking',
-    //         // 'intervals',
-    //         'venues',
-    //         'events',
-    //         'rsps',
-    //         'drivers',
-    //         'vehicles',
-    //         'vehicle_types',
-    //         'delivery_types',
-    //         'cargos',
-    //         'loading_zones',
-    //         'clients'
-    //     ));
-    // }
 
     /**
      * Update the specified resource in storage.
@@ -531,10 +257,11 @@ class BookingController extends Controller
 
     public function storeService(Request $request)
     {
+        // return redirect()->back()->with('error', 'Not enough available slots for the selected service.');
+        // }
         //
         // dd($request->all());
-        $user_id = Auth::user()->id;
-        $booking = new BroadcastBooking();
+        $user = Auth::user();
 
         $rules = [
             'service_id' => 'required',
@@ -545,76 +272,97 @@ class BookingController extends Controller
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            Log::info($validator->errors()->all(':message'));
+            // Log::info($validator->errors()->all(':message'));
             $type = 'error';
-            // $message = implode($validator->errors()->all(':message'));  // use this for json/jquery
             $message = implode($validator->errors()->all('<div>:message</div>'));  // use this for json/jquery
-            Log::info($message);
-            // $message = $validator->errors()->all(':message');
             $notification = array(
                 'message'       => $message,
                 'alert-type'    => $type
             );
             return redirect()->back()->with($notification);
-        } else {
+        }
 
-            // check number of slots available.  if available slots = 0 then exit with a warning message.
-            // this is incase a user grabed the last slot with this user is waiting ..
+        // check number of slots available.  if available slots = 0 then exit with a warning message.
+        // this is incase a user grabed the last slot with this user is waiting ..
+        try {
+            DB::transaction(function () use ($request, $user) {
+                // lock the service row for update
+                $service = BroadcastService::where('id', $request->service_id)->lockForUpdate()->first();
+                Log::info('service available_slots: ' . $service->available_slots);
+                Log::info('request quantity: ' . $request->quantity);
 
+                if (!$service || $service->available_slots < $request->quantity) {
+                    $message = 'Not enough available slots for the selected service.';
+                    throw new \Exception($message);
+                }
 
-            $error = false;
+                $booking = new BroadcastBooking();
+
+                $error = false;
+
+                // $booking->booking_ref_number = 'MDS' . $booking->id;
+                // $booking->schedule_id =  $timeslots->delivery_schedule_id;
+                $booking->service_id = $request->service_id;
+                $booking->quantity = intval($request->quantity);
+                $booking->unit_price = intval($request->unit_price);
+                $booking->total_price = intval($request->quantity) * intval($request->unit_price);
+                $booking->quantity = intval($request->quantity);
+                $booking->created_by = $user->id;
+                $booking->updated_by = $user->id;
+                $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
+                $booking->venue_id = session()->get('VENUE_ID'); // Tie booking to current venue
+                $service = BroadcastService::find($request->service_id);
+
+                $service->available_slots = $service->available_slots - $request->quantity;
+                $service->used_slots = $service->used_slots + $request->quantity;
+                // $booking->event_id = session()->get('EVENT_ID');
+                // $booking->booking_date = Carbon::createFromFormat('d/m/Y', $request->booking_date)->toDateString();
+
+                $service->save();
+                $booking->save();
+
+                // return view('bbs.customer.booking.cart');
+                // return response()->json(['error' => $error, 'message' => $message]);
+            });
+
             $type = 'success';
-            $message = 'Booking created succesfully.' . $booking->id;
-
-            // $booking->booking_ref_number = 'MDS' . $booking->id;
-            // $booking->schedule_id =  $timeslots->delivery_schedule_id;
-            $booking->service_id = $request->service_id;
-            $booking->quantity = intval($request->quantity);
-            $booking->unit_price = intval($request->unit_price);
-            $booking->total_price = intval($request->quantity) * intval($request->unit_price);
-            $booking->quantity = intval($request->quantity);
-            $booking->created_by = $user_id;
-            $booking->updated_by = $user_id;
-            $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
-            $service = BroadcastService::find($request->service_id);
-
-            $service->available_slots = $service->available_slots - $request->quantity;
-            $service->used_slots = $service->used_slots + $request->quantity;
-            // $booking->event_id = session()->get('EVENT_ID');
-            // $booking->booking_date = Carbon::createFromFormat('d/m/Y', $request->booking_date)->toDateString();
-
-            $service->save();
-            $booking->save();
-
+            $message = 'Booking created succesfully.';
             $notification = array(
                 'message'       => $message,
                 'alert-type'    => $type
             );
-        }
-        return redirect()->route('bbs.customer.booking.cart')->with($notification);
-        // return view('bbs.customer.booking.cart');
-        // return response()->json(['error' => $error, 'message' => $message]);
-    }
-
-    public function cart()
-    {
-        // Fetch bookings for the logged-in user
-        $bookings = BroadcastBooking::with('service')
-            ->where('created_by', Auth::user()->id)
-            ->get();
-
-        // Check user role
-        if (Auth::user()->hasRole('SuperAdmin')) {
-            // Show admin cart view
-            return view('bbs.admin.booking.cart', compact('bookings'));
-        } elseif (Auth::user()->hasRole('Customer')) {
-            // Show customer cart view
-            return view('bbs.customer.booking.cart', compact('bookings'));
-        } else {
-            // Optional: redirect other roles or throw error
-            abort(403, 'Unauthorized');
+            return redirect()->route('bbs.customer.booking')->with($notification);
+        } catch (\Exception $e) {
+            Log::error('Error creating booking: ' . $e->getMessage());
+            $type = 'error';
+            $message = 'An error occurred while creating the booking. Please try again.';
+            $notification = array(
+                'message'       => $e->getMessage(),
+                'alert-type'    => $type
+            );
+            return redirect()->back()->with($notification);
         }
     }
+
+    // public function cart()
+    // {
+    //     // Fetch bookings for the logged-in user
+    //     $bookings = BroadcastBooking::with('service')
+    //         ->where('created_by', Auth::user()->id)
+    //         ->get();
+
+    //     // Check user role
+    //     if (Auth::user()->hasRole('SuperAdmin')) {
+    //         // Show admin cart view
+    //         return view('bbs.admin.booking.cart', compact('bookings'));
+    //     } elseif (Auth::user()->hasRole('Customer')) {
+    //         // Show customer cart view
+    //         return view('bbs.customer.booking.cart', compact('bookings'));
+    //     } else {
+    //         // Optional: redirect other roles or throw error
+    //         abort(403, 'Unauthorized');
+    //     }
+    // }
 
     public function update(Request $request)
     {
@@ -836,6 +584,7 @@ class BookingController extends Controller
             return back()->withInput();
         }
     }
+
     public function pickEvent(Request $request)
     {
         if ($request->event_id && $request->venue_id) {

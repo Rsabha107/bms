@@ -44,8 +44,8 @@ Route::get('/', function () {
         if (auth()->user()->hasRole('SuperAdmin')) {
             return redirect()->route('bbs.admin.booking');
         } elseif (auth()->user()->hasRole('Customer')) {
-            Log::info('Redirecting to bbs.customer');
-            return redirect()->route('bbs.customer');
+            Log::info('Redirecting to bbs.customer.booking');
+            return redirect()->route('bbs.customer.booking');
         } else {
             return redirect()->route('login');
         }
@@ -222,6 +222,8 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::post('bbs/customer/booking/cart/store', 'storeService')->name('customer.booking.cart.store');
             Route::get('/bbs/customer/booking/{id}/switch', 'venueSwitch')->name('bbs.customer.booking.switch');
             Route::get('bbs/customer/booking/{id}/switch', 'switch')->name('bbs.customer.booking.switch');
+
+            Route::delete('/bbs/customer/booking/delete/{id}', 'delete')->name('bbs.customer.booking.delete');
 
             Route::get('/bbs/customer/booking/menu/{id}', 'showServices')->name('bbs.customer.booking.menu.show.services');
             Route::get('/bbs/customer/booking/menu', 'build_menu')->name('bbs.customer.booking.menu');
