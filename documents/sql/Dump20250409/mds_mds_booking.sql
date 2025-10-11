@@ -1,0 +1,82 @@
+
+-- MariaDB dump 10.19  Distrib 10.4.24-MariaDB, for Win64 (AMD64)
+--
+-- Host: 127.0.0.1    Database: mds
+-- ------------------------------------------------------
+-- Server version	10.4.24-MariaDB
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `mds_booking`
+--
+
+DROP TABLE IF EXISTS `mds_booking`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `mds_booking` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `event_id` int(11) NOT NULL,
+  `rsp_id` int(11) DEFAULT NULL,
+  `booking_ref_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `booking_date` date NOT NULL,
+  `venue_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `schedule_period_id` int(11) NOT NULL,
+  `schedule_id` int(11) DEFAULT NULL,
+  `driver_id` int(11) NOT NULL,
+  `vehicle_id` int(11) NOT NULL,
+  `vehicle_type_id` int(11) NOT NULL,
+  `booking_party_company_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `booking_party_contact_name` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `booking_party_contact_email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `booking_party_contact_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `delivering_party_company_name` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `delivering_party_contact_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `delivering_party_contact_email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `receiver_name` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `receiver_contact_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dispatch_id` int(11) NOT NULL,
+  `cargo_id` int(11) NOT NULL,
+  `loading_zone_id` int(11) NOT NULL,
+  `active_flag` int(11) NOT NULL,
+  `delivery_status_id` int(11) NOT NULL DEFAULT 12,
+  `arrival_date_time` datetime DEFAULT NULL,
+  `created_by` int(11) NOT NULL,
+  `updated_by` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `mds_booking`
+--
+
+LOCK TABLES `mds_booking` WRITE;
+/*!40000 ALTER TABLE `mds_booking` DISABLE KEYS */;
+INSERT INTO `mds_booking` VALUES (1,1,4,1,'MDS-00052','2025-04-09',5,16,29,NULL,7,7,21,'company','Raaft','asdf@example.com','666667777',NULL,NULL,NULL,'Ali','3459540934',4,18,24,1,12,NULL,1,1,'2025-04-05 21:45:28','2025-04-05 21:45:28'),(2,41,4,1,'MDS-00053','2025-04-09',5,6,29,NULL,7,7,16,'company','Raaft','asdf@example.com','666667777',NULL,NULL,NULL,'Ali','3459540934',5,4,23,1,12,NULL,41,41,'2025-04-07 09:25:01','2025-04-07 19:58:21'),(3,1,4,1,'MDS-00054','2025-04-09',5,19,29,NULL,7,7,19,'company','Raaft','asdf@example.com','666667777',NULL,NULL,NULL,'Ali','3459540934',5,16,22,1,12,NULL,1,1,'2025-04-07 21:26:29','2025-04-07 21:26:29');
+/*!40000 ALTER TABLE `mds_booking` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-04-09  9:13:27

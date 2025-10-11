@@ -1,0 +1,57 @@
+
+-- MariaDB dump 10.19  Distrib 10.4.24-MariaDB, for Win64 (AMD64)
+--
+-- Host: 127.0.0.1    Database: mds
+-- ------------------------------------------------------
+-- Server version	10.4.24-MariaDB
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `mds_cargo_types`
+--
+
+DROP TABLE IF EXISTS `mds_cargo_types`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `mds_cargo_types` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(250) CHARACTER SET utf8mb4 NOT NULL,
+  `active_flag` int(11) NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `updated_by` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `mds_cargo_types`
+--
+
+LOCK TABLES `mds_cargo_types` WRITE;
+/*!40000 ALTER TABLE `mds_cargo_types` DISABLE KEYS */;
+INSERT INTO `mds_cargo_types` VALUES (3,'Branding / Signage Material & Tools ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(4,'Broadcasting & Communication Equipment ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(5,'Catering Equipment ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(6,'Construction Materials',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(7,'Empty Truck (Collection)',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(8,'Firework Material /Equipment ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(9,'Flowers / Plants / Decoration Items ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(10,'Food & Beverages',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(11,'Fuel',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(12,'Furniture /Fixtures',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(13,'General Cargo',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(14,'Generators / Power Supply Material ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(15,'Gift / Marketing Items',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(16,'Golf Carts ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(17,'Housekeeping Materials & Tools ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(18,'IT / Technology Equipment ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(19,'Machinery / Spares /Tools',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(20,'Maintenance Equipment ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(21,'Media & Broadcasting Equipment',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(22,'Medical Equipment ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(23,'Material Handling Equipment',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(24,'Security Equipment',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(25,'Sports Equipment ',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(26,'Team/ Players Kit',1,10,10,'2025-04-05 20:55:16','2025-04-05 20:55:16'),(27,'Trophy, Medals, Prize Material ',1,10,10,'2025-04-05 20:55:17','2025-04-05 20:55:17'),(28,'Waste Management Material  &Tools ',1,10,10,'2025-04-05 20:55:17','2025-04-05 20:55:17'),(29,'Waste Collection',1,10,10,'2025-04-05 20:55:17','2025-04-05 20:55:17'),(30,'Water Distribution',1,10,10,'2025-04-05 20:55:17','2025-04-05 20:55:17'),(31,'Other',1,10,10,'2025-04-05 20:55:17','2025-04-05 20:55:17');
+/*!40000 ALTER TABLE `mds_cargo_types` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-04-09  9:13:19

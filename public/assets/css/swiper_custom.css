@@ -1,0 +1,17 @@
+.carousel.carousel-thumbs-top {
+  /* padding-top: 60px; */
+  padding-bottom: 20px;
+}
+
+.carousel.carousel-thumbs-top .carousel-indicators {
+  /* top: 0;
+  bottom: auto; */
+/* 
+  top: auto;
+  bottom: 0; */
+  margin-bottom: 2rem;
+}
+
+.carousel .carousel-indicators button {
+  width: 100px !important;
+}

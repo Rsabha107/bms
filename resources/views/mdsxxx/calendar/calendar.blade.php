@@ -1,0 +1,47 @@
+@extends('tracki.calendar.layout.cal')
+@section('main')
+
+<div class="content">
+        <div class="row g-0 mb-4 align-items-center">
+          <div class="col-5 col-md-6">
+            <h4 class="mb-0 text-body-emphasis fw-bold fs-md-6"><span class="calendar-day d-block d-md-inline mb-1"></span><span class="px-3 fw-thin text-body-quaternary d-none d-md-inline">|</span><span class="calendar-date"></span></h4>
+          </div>
+          <!-- <div class="col-7 col-md-6 d-flex justify-content-end">
+            <button class="btn btn-link text-body px-0 me-2 me-md-4"><span class="fa-solid fa-sync fs-10 me-2"></span><span class="d-none d-md-inline">Sync Now</span></button>
+            <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#addEventModal"> <span class="fas fa-plus pe-2 fs-10"></span>Add new task </button>
+          </div> -->
+        </div>
+        <div class="mx-n4 px-4 mx-lg-n6 px-lg-6 border-y border-translucent">
+          <div class="row py-3 gy-3 gx-0">
+            <div class="col-6 col-md-4 order-1 d-flex align-items-center">
+              <button class="btn btn-sm btn-phoenix-primary px-4" data-event="today">Today</button>
+            </div>
+            <div class="col-12 col-md-4 order-md-1 d-flex align-items-center justify-content-center">
+              <button class="btn icon-item icon-item-sm shadow-none text-body-emphasis p-0" type="button" data-event="prev" title="Previous"><span class="fas fa-chevron-left"></span></button>
+              <h3 class="px-3 text-body-emphasis fw-semibold calendar-title mb-0"> </h3>
+              <button class="btn icon-item icon-item-sm shadow-none text-body-emphasis p-0" type="button" data-event="next" title="Next"><span class="fas fa-chevron-right"></span></button>
+            </div>
+            <div class="col-6 col-md-4 ms-auto order-1 d-flex justify-content-end">
+              <div>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button class="btn btn-phoenix-secondary active-view" data-fc-view="dayGridMonth">Month</button>
+                  <button class="btn btn-phoenix-secondary" data-fc-view="timeGridWeek">Week</button>
+                  <button class="btn btn-phoenix-secondary" data-fc-view="timeGridDay">Day</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="calendar-outline mt-6 mb-9" id="appCalendar"></div>
+
+      <div class="modal fade" id="eventDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border border-translucent"></div>
+        </div>
+      </div>
+
+      @endsection
+
+@push('script')
+
+@endpush
