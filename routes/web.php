@@ -9,7 +9,7 @@ use App\Http\Controllers\GeneralSettings\AttachmentController;
 use App\Http\Controllers\Bbs\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Bbs\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Bbs\Setting\EventController;
-use App\Http\Controllers\Mds\Auth\AdminController as AuthAdminController;
+use App\Http\Controllers\Bbs\Auth\AdminController as AuthAdminController;
 use App\Http\Controllers\Bbs\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Mds\Customer\UserController as CustomerUserController;
 use App\Http\Controllers\Mds\Manager\BookingController as ManagerBookingController;
@@ -292,14 +292,14 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
 Route::group(['middleware' => 'prevent-back-history'], function () {
 
     // Add User
-    Route::get('/mds/auth/signup', [AuthAdminController::class, 'signUp'])->name('mds.auth.signup');
+    Route::get('/bbs/auth/signup', [AuthAdminController::class, 'signUp'])->name('mds.auth.signup');
     Route::post('/signup/store', [UserController::class, 'store'])->name('admin.signup.store');
 
     Route::middleware(['auth', 'prevent-back-history'])->group(function () {
 
-        Route::get('mds/auth/otp', [AuthAdminController::class, 'showOtp'])->name('otp.get');
+        Route::get('bbs/auth/otp', [AuthAdminController::class, 'showOtp'])->name('otp.get');
         Route::post('verify-otp', [AuthAdminController::class, 'verifyOtpAndLogin'])->name('auth.otp.post');
-        Route::get('mds/auth/resend', [AuthAdminController::class, 'resendOTP'])->name('otp.resend.get');
+        Route::get('bbs/auth/resend', [AuthAdminController::class, 'resendOTP'])->name('otp.resend.get');
 
         //used to show images in private folder
         Route::get('/doc/{file}', [UtilController::class, 'showImage'])->name('a');
@@ -381,12 +381,12 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
     Route::middleware(['prevent-back-history'])->group(function () {
 
         // Route::get('/tracki/auth/login', [AdminController::class, 'login'])->name('tracki.auth.login')->middleware('prevent-back-history');
-        Route::get('/mds/auth/login', [AuthAdminController::class, 'login'])->name('mds.auth.login')->middleware('prevent-back-history');
+        Route::get('/bbs/auth/login', [AuthAdminController::class, 'login'])->name('bbs.auth.login')->middleware('prevent-back-history');
 
-        Route::get('/mds/auth/forgot', [AdminController::class, 'forgotPassword'])->name('mds.auth.forgot');
-        Route::post('forget-password', [AdminController::class, 'submitForgetPasswordForm'])->name('forgot.password.post');
-        Route::get('tracki/auth/reset/{token}', [AdminController::class, 'showResetPasswordForm'])->name('reset.password.get');
-        Route::post('reset-password', [AdminController::class, 'submitResetPasswordForm'])->name('reset.password.post');
+        Route::get('/bbs/auth/forgot', [AuthAdminController::class, 'forgotPassword'])->name('bbs.auth.forgot');
+        Route::post('forget-password', [AuthAdminController::class, 'submitForgetPasswordForm'])->name('forgot.password.post');
+        Route::get('tracki/auth/reset/{token}', [AuthAdminController::class, 'showResetPasswordForm'])->name('reset.password.get');
+        Route::post('reset-password', [AuthAdminController::class, 'submitResetPasswordForm'])->name('reset.password.post');
 
 
         // Route::get('/send-mail/nb', [SendMailController::class, 'newBookingEmail']);

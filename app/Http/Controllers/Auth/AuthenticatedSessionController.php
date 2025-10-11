@@ -55,7 +55,7 @@ class AuthenticatedSessionController extends Controller
             if($otp->status === true){
                 $user->notify(new EmailOtpVerification($otp->token));
             }
-            return view('mds/auth/otp');
+            return view('bbs/auth/otp');
         }
 
                 // //set the default workspace as set during user creation
