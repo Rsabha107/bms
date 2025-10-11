@@ -46,8 +46,8 @@ class AuthenticatedSessionController extends Controller
         Auth::logoutOtherDevices($request->password);
 
         Log::info('AuthenticatedSessionController:store user: '.$user);
-        Log::info('mds.use_otp: '.config('mds.use_otp'));
-        if (config('mds.use_otp')) {
+        Log::info('settings.otp_enabled: '.config('settings.otp_enabled'));
+        if (config('settings.otp_enabled')) {
             // $this->showOtp();
             // $simpleOTP = new SimpleOTP();
             // $code = $simpleOTP->create(auth()->user()->email);
