@@ -40,7 +40,7 @@
                             <th data-sortable="false" data-field="menu_item_id" data-visible="true" class="align-middle">Menu Item</th>
                             <th data-sortable="true" data-field="title" class="align-middle review">Title</th>
                             <th data-sortable="true" data-field="short_description" class="align-middle review">Short Desc</th>
-                            <th data-sortable="true" data-field="long_description">Description</th>
+                            <th data-sortable="true" data-field="long_description" data-visible="false" class="align-middle">Description</th>
                             <th data-sortable="true" data-field="created_at" data-visible="false"><?= get_label('created_at', 'Created at') ?></th>
                             <th data-sortable="true" data-field="updated_at" data-visible="false"><?= get_label('updated_at', 'Updated at') ?></th>
                             <th data-formatter="actionsFormatter" class="text-end"><?= get_label('actions', 'Actions') ?></th>

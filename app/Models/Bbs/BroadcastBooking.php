@@ -30,5 +30,9 @@ class BroadcastBooking extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+    public function match()
+    {
+        return $this->belongsTo(Matches::class, 'match_id');
+    }
 
 }

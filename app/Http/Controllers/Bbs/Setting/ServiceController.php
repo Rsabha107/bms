@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Bbs\Setting;
 use App\Http\Controllers\Controller;
 use App\Models\Bbs\BroadcastBooking;
 use App\Models\Bbs\BroadcastService;
+use App\Models\Bbs\Event;
 use App\Models\Bbs\MenuItem;
-use App\Models\Event;
 use App\Models\Mds\DriverStatus;
 use App\Models\Mds\MdsDriver;
 use Illuminate\Http\Request;
@@ -86,14 +86,7 @@ class ServiceController extends Controller
                 session()->put('EVENT_ID', $id);
                 Log::info('Event ID: ' . session()->get('EVENT_ID'));
 
-                // Redirect based on role
-                if (auth()->user()->hasRole('Admin')) {
-                    return redirect()->route('bbs.admin.booking.list')->with('message', 'Event switched.');
-                } elseif (auth()->user()->hasRole('Customer')) {
-                    return redirect()->route('bbs.customer.booking.list')->with('message', 'Event switched.');
-                } else {
-                    return redirect()->back()->with('message', 'Event switched.');
-                }
+                return redirect()->route('bbs.customer.booking')->with('message', 'Event switched.');
             } else {
                 return back()->with('error', 'Event not found.');
             }

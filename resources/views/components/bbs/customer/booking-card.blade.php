@@ -41,6 +41,7 @@
                             <th data-sortable="false" data-field="created_by" >Broadcaster</th>
                             <th data-sortable="false" data-field="event_id" >Event</th>
                             <th data-sortable="false" data-field="venue_id" >Venue</th>
+                            <th data-sortable="false" data-field="match_id" >Match</th>
                             <th data-sortable="false" data-field="service_id" ><?= get_label('service_title', 'Service') ?></th>
                             <th data-sortable="false" data-field="quantity" ><?= get_label('quantity', 'Quantity') ?></th>
                             <th data-sortable="true" data-field="created_at" data-visible="false" ><?= get_label('created_at', 'Created at') ?></th>

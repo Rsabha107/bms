@@ -20,11 +20,11 @@ class CheckOtpSession
         // Log::info('CheckOtpSession:: logged in: ' . auth()->check());
         // dd(session()->has('OTPSESSIONKEY'));
         // if (true) {
-        if (config('mds.use_otp')) {
+        if (config('settings.otp_enabled')) {
             if (!session()->get('OTPSESSIONKEY') && auth()->check()) {
                 // Log::info('inside if');
 
-                return redirect()->route('mds.auth.login');
+                return redirect()->route('bbs.auth.login');
             }
         }
         return $next($request);

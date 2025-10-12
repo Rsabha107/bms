@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendAdminCancelBookingEmailJob;
 use App\Jobs\SendNewBookingEmailJob;
 use App\Models\Bbs\BroadcastBooking;
+use App\Models\Bbs\Event;
 use App\Models\Mds\BookingSlot;
 use App\Models\Mds\FunctionalArea;
 use App\Models\Mds\DeliveryBooking;
@@ -97,6 +98,7 @@ class BookingController extends Controller
                 'created_by' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->name . '</div>',
                 'event_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->event?->name . '</div>',
                 'venue_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->venue?->title . '</div>',
+                'match_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->match?->match_code . '</div>',
                 'service_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->service?->title . '</div>',
                 'quantity' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->quantity . '</div>',
                 // 'image' => '<div class="align-middle  fs-9 ps-3">' . $op->image . '</div>',
@@ -703,7 +705,7 @@ class BookingController extends Controller
     public function switch($id)
     {
         if ($id) {
-            if (MdsEvent::findOrFail($id)) {
+            if (Event::findOrFail($id)) {
                 Log::info('Event ID: ' . $id);
 
                 session()->put('EVENT_ID', $id);

@@ -18,6 +18,7 @@ use App\Models\Mds\DeliveryVehicleType;
 use App\Models\Mds\DeliveryVenue;
 use App\Models\Bbs\BroadcastService;
 use App\Models\Bbs\Event;
+use App\Models\Bbs\Matches;
 use App\Models\Bbs\MenuItem;
 use App\Models\Mds\DeliveryZone;
 use App\Models\Mds\MdsDriver;
@@ -64,6 +65,8 @@ class BookingController extends Controller
     public function list()
     {
         Log::info('BookingController::list request: ' . json_encode(request()->all()));
+        Log::info('session()->all(): ' . json_encode(session()->all()));
+        Log::info('session()->get(EVENT_ID): ' . session()->get('EVENT_ID'));
         $search = request('search');
         $sort = (request('sort')) ? request('sort') : "id";
         $order = (request('order')) ? request('order') : "DESC";
@@ -113,9 +116,9 @@ class BookingController extends Controller
                 ' data-table="event_table" data-bs-toggle="tooltip" data-bs-placement="right" title="Update">' .
                 '<i class="fa-solid fa-pen-to-square text-primary"></i></a>';
             $delete_action =
-                '<a href="javascript:void(0)" class="btn btn-sm" data-table="event_table" data-id="' .
+                '<a href="javascript:void(0)" class="btn btn-sm" data-table="bookings_table" data-id="' .
                 $op->id .
-                '" id="deleteEvent" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
+                '" id="deleteBooking" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
                 '<i class="fa-solid fa-trash text-danger"></i></a></div></div>';
 
             $actions = $delete_action;
@@ -125,6 +128,7 @@ class BookingController extends Controller
                 'created_by' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->name . '</div>',
                 'event_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->event?->name . '</div>',
                 'venue_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->venue?->title . '</div>',
+                'match_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->match?->match_code . '</div>',
                 'service_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->service?->title . '</div>',
                 'quantity' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->quantity . '</div>',
                 // 'image' => '<div class="align-middle  fs-9 ps-3">' . $op->image . '</div>',
@@ -160,6 +164,8 @@ class BookingController extends Controller
             ->with('children.children') // recursive depth
             ->orderBy('order_number')
             ->get();
+        $venues = Venue::all();
+        $matches = Matches::all();
 
         session()->put($parent_menu_db->link, 'active');
         if ($parent_menu_db->parent) {
@@ -170,7 +176,7 @@ class BookingController extends Controller
 
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'parent_menu')
+            compact('services', 'menus', 'parent_menu', 'venues', 'matches')
         );
     }
     public function listService()
@@ -266,6 +272,8 @@ class BookingController extends Controller
         $rules = [
             'service_id' => 'required',
             'quantity' => 'required',
+            'venue_id' => 'required',
+            'match_id' => 'required',
             // 'x' => 'required',
         ];
 
@@ -307,6 +315,8 @@ class BookingController extends Controller
                 $booking->unit_price = intval($request->unit_price);
                 $booking->total_price = intval($request->quantity) * intval($request->unit_price);
                 $booking->quantity = intval($request->quantity);
+                $booking->venue_id = $request->venue_id;
+                $booking->match_id = $request->match_id;
                 $booking->created_by = $user->id;
                 $booking->updated_by = $user->id;
                 $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
@@ -569,13 +579,7 @@ class BookingController extends Controller
                 Log::info('Event ID: ' . session()->get('EVENT_ID'));
 
                 // Redirect based on role
-                if (auth()->user()->hasRole('Admin')) {
-                    return redirect()->route('bbs.admin.booking.list')->with('message', 'Event switched.');
-                } elseif (auth()->user()->hasRole('Customer')) {
-                    return redirect()->route('bbs.customer.booking.list')->with('message', 'Event switched.');
-                } else {
-                    return redirect()->back()->with('message', 'Event switched.');
-                }
+                return redirect()->route('bbs.customer.booking')->with('message', 'Event switched.');
             } else {
                 return back()->with('error', 'Event not found.');
             }

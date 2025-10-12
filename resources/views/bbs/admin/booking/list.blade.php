@@ -15,7 +15,7 @@
                     <a href="{{route('home')}}"><?= get_label('home', 'Home') ?></a>
                 </li>
                 <li class="breadcrumb-item active">
-                    <?= get_label('variation', 'Parking Variation') ?>
+                    <?= get_label('variation', 'Bookings') ?>
                 </li>
             </ol>
         </nav>
