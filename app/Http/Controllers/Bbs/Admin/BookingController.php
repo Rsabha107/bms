@@ -86,12 +86,12 @@ class BookingController extends Controller
                 ' data-table="event_table" data-bs-toggle="tooltip" data-bs-placement="right" title="Update">' .
                 '<i class="fa-solid fa-pen-to-square text-primary"></i></a>';
             $delete_action =
-                '<a href="javascript:void(0)" class="btn btn-sm" data-table="event_table" data-id="' .
+                '<a href="javascript:void(0)" class="btn btn-sm" data-table="bookings_table" data-id="' .
                 $op->id .
-                '" id="deleteEvent" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
+                '" id="deleteBooking" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
                 '<i class="fa-solid fa-trash text-danger"></i></a></div></div>';
 
-            $actions = $update_action . $delete_action;
+            $actions = $delete_action;
             return  [
                 'id' => $op->id,
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-9 ps-2">' .$op->id. '</div>',

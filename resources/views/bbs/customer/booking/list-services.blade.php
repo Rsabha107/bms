@@ -34,7 +34,7 @@
         </div>
     @endif
 
-    <div class="row g-4 mb-5">
+    <div class="row g-7 mb-5">
         @foreach ($services as $service)
             @php
                 $badge_bg_color = $service->available_slots > 0 ? 'success' : 'danger';
@@ -45,7 +45,7 @@
             <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
                 <div class="swiper-slide">
 
-                    <div class="card overflow-hidden h-100 shadow-sm border-0 rounded-4" style="max-width: 320px;">
+                    <div class="card overflow-hidden h-100 shadow-sm border-0 rounded-4" >
                         <div class="card-body text-center p-4">
                             <div class="d-flex justify-content-between align-items-start mb-2" style="height: 70px">
                                 <h5 class="fw-bold mb-0 text-start">{{ $service->title }}</h5>

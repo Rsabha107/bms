@@ -34,13 +34,13 @@
                                 </option>
                                 @endforeach
                             </select>
-                            <select class="form-select mb-3" name="venue_id" required>
+                            {{-- <select class="form-select mb-3" name="venue_id" required>
                                 <option value="" selected>Select venue ..</option>
                                 @foreach ($venues as $venue)
                                 <option value="{{ $venue->id }}">{{ $venue->title }}
                                 </option>
                                 @endforeach
-                            </select>
+                            </select> --}}
                             <button class="btn btn-subtle-primary w-100 mb-3" type="submit">Choose
                                 Event</button>
                         </form>

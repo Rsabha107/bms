@@ -55,10 +55,12 @@ class BookingController extends Controller
             ->with('children.children') // recursive depth
             ->orderBy('order_number')
             ->get();
-
+        $venues = Venue::all();
+        $matches = Matches::all();
+        
         return view(
             'bbs.customer.booking.list',
-            compact('services', 'menus')
+            compact('services', 'menus', 'venues', 'matches')
         );
     }
 
@@ -187,10 +189,12 @@ class BookingController extends Controller
             ->with('children.children') // recursive depth
             ->orderBy('order_number')
             ->get();
+        $venues = Venue::all();
+        $matches = Matches::all();
 
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'parent_menu')
+            compact('services', 'menus', 'parent_menu', 'venues', 'matches')
         );
     }
 
@@ -320,7 +324,6 @@ class BookingController extends Controller
                 $booking->created_by = $user->id;
                 $booking->updated_by = $user->id;
                 $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
-                $booking->venue_id = session()->get('VENUE_ID'); // Tie booking to current venue
                 $service = BroadcastService::find($request->service_id);
 
                 $service->available_slots = $service->available_slots - $request->quantity;
@@ -591,16 +594,16 @@ class BookingController extends Controller
 
     public function pickEvent(Request $request)
     {
-        if ($request->event_id && $request->venue_id) {
+        if ($request->event_id) {
             // Check and store Event ID
-            if (Event::findOrFail($request->event_id) && !session()->has('EVENT_ID')) {
+            if (Event::findOrFail($request->event_id)) {
                 session()->put('EVENT_ID', $request->event_id);
             }
 
-            // Check and store Venue ID
-            if (Venue::findOrFail($request->venue_id) && !session()->has('VENUE_ID')) {
-                session()->put('VENUE_ID', $request->venue_id);
-            }
+            // // Check and store Venue ID
+            // if (Venue::findOrFail($request->venue_id) && !session()->has('VENUE_ID')) {
+            //     session()->put('VENUE_ID', $request->venue_id);
+            // }
 
             return redirect()->route('bbs.customer.booking')
                 ->with('message', 'Event and Venue switched.');
