@@ -55,9 +55,10 @@ class BookingController extends Controller
             ->with('children.children') // recursive depth
             ->orderBy('order_number')
             ->get();
+        // Log::info('menus: ' . json_encode($menus, JSON_PRETTY_PRINT));
         $venues = Venue::all();
         $matches = Matches::all();
-        
+
         return view(
             'bbs.customer.booking.list',
             compact('services', 'menus', 'venues', 'matches')
@@ -126,6 +127,7 @@ class BookingController extends Controller
             $actions = $delete_action;
             return  [
                 'id' => $op->id,
+                'ref_number' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->ref_number . '</div>',
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-9 ps-2">' .$op->id. '</div>',
                 'created_by' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->name . '</div>',
                 'event_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->event?->name . '</div>',
@@ -159,8 +161,10 @@ class BookingController extends Controller
         //     // ->where('venue_id', session()->get('VENUE_ID'))
         //     ->get();
         forget_menu_session();
-        $parent_menu_db = MenuItem::find($id);
-        $parent_menu = $parent_menu_db->title;
+        $selected_menu_db = MenuItem::find($id);
+        $selected_menu_title = $selected_menu_db->title;
+        // get the parent menu title if exists
+        $selected_menu_display = ($selected_menu_db->parent) ? $selected_menu_db->parent->title . '/' . $selected_menu_title : $selected_menu_title;
         $services = BroadcastService::where('menu_item_id', $id)->get();
         $menus = MenuItem::whereNull('parent_id')
             ->with('children.children') // recursive depth
@@ -169,21 +173,21 @@ class BookingController extends Controller
         $venues = Venue::all();
         $matches = Matches::all();
 
-        session()->put($parent_menu_db->link, 'active');
-        if ($parent_menu_db->parent) {
-            session()->put($parent_menu_db->parent->link, 'active');
+        session()->put($selected_menu_db->link, 'active');
+        if ($selected_menu_db->parent) {
+            session()->put($selected_menu_db->parent->link, 'active');
         }
 
-        Log::info('session()->all(): ' . json_encode(session()->all()));
+        // Log::info('session()->all(): ' . json_encode(session()->all()));
 
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'parent_menu', 'venues', 'matches')
+            compact('services', 'menus', 'selected_menu_display', 'venues', 'matches')
         );
     }
     public function listService()
     {
-        $parent_menu = 'All Services';
+        $selected_menu_display = 'All Services';
         $services = BroadcastService::all();
         $menus = MenuItem::whereNull('parent_id')
             ->with('children.children') // recursive depth
@@ -194,7 +198,7 @@ class BookingController extends Controller
 
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'parent_menu', 'venues', 'matches')
+            compact('services', 'menus', 'selected_menu_display', 'venues', 'matches')
         );
     }
 
@@ -204,6 +208,8 @@ class BookingController extends Controller
             ->with('children.children') // recursive depth
             ->orderBy('order_number')
             ->get();
+
+        appLog('menus: ' . json_encode($menus));
 
         // dd($menu);
         return view('/bbs/customer/booking/list-menu', compact('menus'));
@@ -218,32 +224,59 @@ class BookingController extends Controller
     public function delete($id)
     {
         // LOG::info('inside delete');
-        $op = BroadcastBooking::find($id);
-        $service = BroadcastService::find($op->service_id);
+        DB::beginTransaction();
+        try {
+            $op = BroadcastBooking::find($id);
+            $service = BroadcastService::find($op->service_id);
+            $groupKey = $service->group_key;
+            $current_booking_quantity = $op->quantity;
 
-        // get the timeslot id
-        // $timeslot_id = $op->schedule_period_id;
-        // get the timeslot
-        // $timeslot = BookingSlot::find($timeslot_id);
+            Log::info('service available_slots before delete: ' . $current_booking_quantity);
+            // get the timeslot id
+            // $timeslot_id = $op->schedule_period_id;
+            // get the timeslot
+            // $timeslot = BookingSlot::find($timeslot_id);
 
-        $service->available_slots = $service->available_slots + 1;
-        $service->used_slots = $service->used_slots - 1;
+            // $service->available_slots = $service->available_slots + 1;
+            // $service->used_slots = $service->used_slots - 1;
 
-        $service->save();
+            // sync all items in the same group
+            Log::info('groupKey: ' . $groupKey);
+            Log::info('broadcast service id: ' . $id);
 
-        $op->delete();
+            if ($groupKey) {
+                BroadcastService::where('group_key', $groupKey)
+                    ->where('id', '!=', $service->id)
+                    ->update(['available_slots' => DB::raw('available_slots + ' . $current_booking_quantity), 'used_slots' => DB::raw('used_slots - ' . $current_booking_quantity)]);
+            }
+            
+            $service->increment('available_slots', intval($current_booking_quantity));
+            $service->decrement('used_slots', intval($current_booking_quantity));
 
-        $error = false;
-        $message = 'Reservation deleted succesfully.';
 
-        $notification = array(
-            'message'       => 'Reservation deleted successfully',
-            'alert-type'    => 'success'
-        );
+            // $service->save();
 
-        return response()->json(['error' => $error, 'message' => $message]);
-        // return redirect()->route('tracki.setup.workspace')->with($notification);
-    } // delete
+            $op->delete();
+
+            DB::commit();
+            $error = false;
+            $message = 'Reservation deleted succesfully.';
+
+            $notification = array(
+                'message'       => 'Reservation deleted successfully',
+                'alert-type'    => 'success'
+            );
+
+            return response()->json(['error' => $error, 'message' => $message]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting reservation: ' . $e->getMessage());
+            $error = true;
+            $message = 'An error occurred while deleting the reservation. Please try again.';
+            return response()->json(['error' => $error, 'message' => $message]);
+            // return redirect()->route('tracki.setup.workspace')->with($notification);
+        } // delete
+    }
 
 
     public function detail($id)
@@ -300,6 +333,7 @@ class BookingController extends Controller
             DB::transaction(function () use ($request, $user) {
                 // lock the service row for update
                 $service = BroadcastService::where('id', $request->service_id)->lockForUpdate()->first();
+                $groupKey = $service->group_key;
                 Log::info('service available_slots: ' . $service->available_slots);
                 Log::info('request quantity: ' . $request->quantity);
 
@@ -326,12 +360,20 @@ class BookingController extends Controller
                 $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
                 $service = BroadcastService::find($request->service_id);
 
-                $service->available_slots = $service->available_slots - $request->quantity;
-                $service->used_slots = $service->used_slots + $request->quantity;
+                $service->decrement('available_slots', $request->quantity);
+                $service->increment('used_slots', $request->quantity);
+
+                // sync all items in the same group
+                if ($groupKey) {
+                    BroadcastService::where('group_key', $groupKey)
+                        ->where('id', '!=', $service->id)
+                        ->update(['available_slots' => DB::raw('available_slots - ' . $request->quantity), 'used_slots' => DB::raw('used_slots + ' . $request->quantity)]);
+                }
+
                 // $booking->event_id = session()->get('EVENT_ID');
                 // $booking->booking_date = Carbon::createFromFormat('d/m/Y', $request->booking_date)->toDateString();
 
-                $service->save();
+                // $service->save();
                 $booking->save();
 
                 // return view('bbs.customer.booking.cart');

@@ -344,7 +344,7 @@ class AdminController extends Controller
     public function login()
     {
         Auth::guard('web')->logout();
-        return view('bbs.auth.sign-in');
+        return view('auth.sign-in');
     }
 
     public function verifyOtpAndLogin(Request $request)
@@ -391,7 +391,7 @@ class AdminController extends Controller
 
     public function showOtp()
     {
-        return view('bbs.auth.otp');
+        return view('auth.otp');
     }
 
     public function resendOTP()
@@ -417,12 +417,12 @@ class AdminController extends Controller
     public function signUp()
     {
         $events = MdsEvent::all();
-        return view('bbs.auth.sign-up', compact('events'));
+        return view('auth.sign-up', compact('events'));
     }
 
     public function forgotPassword()
     {
-        return view('bbs.auth.forgot');
+        return view('auth.forgot');
     }
 
     public function submitForgetPasswordForm(Request $request): RedirectResponse

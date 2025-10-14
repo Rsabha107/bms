@@ -20,20 +20,20 @@
                         </div>
                         <div class="row mb-3">
                             <x-formy.form_select class="col-sm-6 col-md-12 mb-3" floating="1" selectedValue=""
-                                name="event_id" elementId="mds_schedule_event_filter" label="Event" required="required"
+                                name="event_id" elementId="schedule_event_filter" label="Event" required="required"
                                 :forLoopCollection="$events" itemIdForeach="id" itemTitleForeach="name" style=""
                                 addDynamicButton="0" />
                         </div>
                         <div class="row mb-3">
                             <x-formy.form_select class="col-sm-6 col-md-12 mb-3" floating="1" selectedValue=""
-                                name="venue_id" elementId="mds_schedule_venue_filter" label="Venue" required="required"
+                                name="venue_id" elementId="schedule_venue_filter" label="Venue" required="required"
                                 :forLoopCollection="$venues" itemIdForeach="id" itemTitleForeach="title" style=""
                                 addDynamicButton="0" />
                         </div>
                         <div class="row mb-3">
                             <x-formy.form_select class="col-sm-6 col-md-12 mb-3" floating="1" selectedValue=""
-                                name="rsp_id" elementId="mds_schedule_rsp_filter" label="RSP" required="required"
-                                :forLoopCollection="$rsps" itemIdForeach="id" itemTitleForeach="title" style=""
+                                name="match_id" elementId="schedule_match_filter" label="Match" required="required"
+                                :forLoopCollection="$matches" itemIdForeach="id" itemTitleForeach="match_code" style=""
                                 addDynamicButton="0" />
                         </div>
                     </div>

@@ -28524,7 +28524,7 @@ html:not(.navbar-vertical-collapsed) .navbar-vertical.navbar-expand-xs .navbar-v
 /* RSAB */
 .navbar-vertical .navbar-vertical-footer {
   position: fixed;
-  width: 18.875rem;
+  width: 20.875rem;
   /* width: 15.875rem; */
   height: 4rem;
   display: none;
@@ -28743,7 +28743,7 @@ html:not(.navbar-vertical-collapsed) .navbar-vertical.navbar-expand-xs .navbar-v
 }
 @media (min-width: 992px) {
   .navbar-vertical.navbar-expand-lg {
-    width: 18.875rem;
+    width: 20.875rem;
     border-right: 1px solid var(--phoenix-navbar-vertical-border-color);
     margin: 0;
     -webkit-transition: width 0.2s ease;
@@ -28822,7 +28822,7 @@ html:not(.navbar-vertical-collapsed) .navbar-vertical.navbar-expand-xs .navbar-v
   .navbar-vertical.navbar-expand-lg ~ .navbar-top ~ .content {
     padding-left: 2.5rem;
     padding-right: 2.5rem;
-    margin-left: 18.875rem;
+    margin-left: 20.875rem;
   }
 }
 @media (min-width: 768px) {

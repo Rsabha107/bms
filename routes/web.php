@@ -4,16 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChartsController;
 use App\Http\Controllers\Backend\RoleController;
-use App\Http\Controllers\Mds\Setting\BookingStatusController;
 use App\Http\Controllers\GeneralSettings\AttachmentController;
 use App\Http\Controllers\Bbs\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Bbs\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Bbs\Setting\EventController;
 use App\Http\Controllers\Bbs\Auth\AdminController as AuthAdminController;
 use App\Http\Controllers\Bbs\Customer\BookingController as CustomerBookingController;
-use App\Http\Controllers\Mds\Customer\UserController as CustomerUserController;
-use App\Http\Controllers\Mds\Manager\BookingController as ManagerBookingController;
-use App\Http\Controllers\Mds\Manager\UserController as ManagerUserController;
 use App\Http\Controllers\Mds\Setting\AppSettingController;
 use App\Http\Controllers\Mds\Setting\EventImageController;
 use App\Http\Controllers\Bbs\Setting\ServiceController;
@@ -22,6 +18,7 @@ use App\Http\Controllers\StatusController;
 
 use App\Http\Controllers\Bbs\Setting\VenueController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Bbs\Admin\ImportExportController;
 use App\Http\Controllers\UtilController;
 
 /*
@@ -96,6 +93,12 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
     // Setting ROUTE ******************************************************************** Admin All Route
     Route::middleware(['auth', 'otp', 'mutli.event', 'XssSanitizer', 'role:SuperAdmin', 'roles:admin', 'prevent-back-history', 'auth.session'])->group(function () {
 
+                    //Import and Export
+            Route::controller(ImportExportController::class)->group(function () {
+                Route::get('/bbs/admin/booking/import', 'showImportForm')->name('bbs.admin.import.show.form');
+                Route::post('/bbs/admin/booking/import', 'import')->name('bbs.admin.import.store');
+                Route::post('/bbs/admin/booking/export', 'export')->name('bbs.admin.export');
+            });
 
         Route::controller(ServiceController::class)->group(function () {
             Route::get('/bbs/setting/service', 'index')->name('bbs.setting.service');
@@ -106,7 +109,7 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::delete('/bbs/setting/service/delete/{id}',  'delete')->name('bbs.setting.service.delete');
             // Route::post('/bbs/setting/service/store', 'store')->name('bbs.setting.service.store');
             Route::post('bbs/service/status/update', 'updateStatus')->name('bbs.service.status.update');
-            Route::get('bbs/service/status/edit/{id}', 'editStatus')->name('mds.service.status.edit');
+            Route::get('bbs/service/status/edit/{id}', 'editStatus')->name('bbs.service.status.edit');
             Route::get('/bbs/setting/service/mv/get/{id}', 'getView')->name('bbs.setting.service.get.mv');
             Route::get('bbs/admin/booking/{id}/switch', 'switch')->name('bbs.admin.booking.switch');
 
@@ -292,14 +295,14 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
 Route::group(['middleware' => 'prevent-back-history'], function () {
 
     // Add User
-    Route::get('/bbs/auth/signup', [AuthAdminController::class, 'signUp'])->name('mds.auth.signup');
+    Route::get('/auth/signup', [AuthAdminController::class, 'signUp'])->name('mds.auth.signup');
     Route::post('/signup/store', [UserController::class, 'store'])->name('admin.signup.store');
 
     Route::middleware(['auth', 'prevent-back-history'])->group(function () {
 
-        Route::get('bbs/auth/otp', [AuthAdminController::class, 'showOtp'])->name('otp.get');
+        Route::get('auth/otp', [AuthAdminController::class, 'showOtp'])->name('otp.get');
         Route::post('verify-otp', [AuthAdminController::class, 'verifyOtpAndLogin'])->name('auth.otp.post');
-        Route::get('bbs/auth/resend', [AuthAdminController::class, 'resendOTP'])->name('otp.resend.get');
+        Route::get('auth/resend', [AuthAdminController::class, 'resendOTP'])->name('otp.resend.get');
 
         //used to show images in private folder
         Route::get('/doc/{file}', [UtilController::class, 'showImage'])->name('a');
@@ -381,11 +384,11 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
     Route::middleware(['prevent-back-history'])->group(function () {
 
         // Route::get('/tracki/auth/login', [AdminController::class, 'login'])->name('tracki.auth.login')->middleware('prevent-back-history');
-        Route::get('/bbs/auth/login', [AuthAdminController::class, 'login'])->name('bbs.auth.login')->middleware('prevent-back-history');
+        Route::get('/auth/login', [AuthAdminController::class, 'login'])->name('auth.login')->middleware('prevent-back-history');
 
-        Route::get('/bbs/auth/forgot', [AuthAdminController::class, 'forgotPassword'])->name('bbs.auth.forgot');
+        Route::get('/auth/forgot', [AuthAdminController::class, 'forgotPassword'])->name('auth.forgot');
         Route::post('forget-password', [AuthAdminController::class, 'submitForgetPasswordForm'])->name('forgot.password.post');
-        Route::get('tracki/auth/reset/{token}', [AuthAdminController::class, 'showResetPasswordForm'])->name('reset.password.get');
+        Route::get('/auth/reset/{token}', [AuthAdminController::class, 'showResetPasswordForm'])->name('reset.password.get');
         Route::post('reset-password', [AuthAdminController::class, 'submitResetPasswordForm'])->name('reset.password.post');
 
 

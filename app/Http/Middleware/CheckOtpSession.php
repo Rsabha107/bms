@@ -24,7 +24,7 @@ class CheckOtpSession
             if (!session()->get('OTPSESSIONKEY') && auth()->check()) {
                 // Log::info('inside if');
 
-                return redirect()->route('bbs.auth.login');
+                return redirect()->route('auth.login');
             }
         }
         return $next($request);

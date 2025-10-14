@@ -6,6 +6,8 @@ use App\Models\GlobalStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BroadcastBooking extends Model
 {
@@ -13,6 +15,32 @@ class BroadcastBooking extends Model
 
     protected $guarded = [];
     protected $table = 'broadcast_bookings';
+
+
+    public static function boot()
+    {
+        parent::boot();
+            static::creating(function ($model) {
+
+            DB::transaction(function () use ($model) {
+                Log::info('Generating ref_number for Profile');
+                // Lock the row for update to prevent race conditions
+                $seq = SeqNumGen::lockForUpdate()->firstOrFail();
+                Log::info('SeqNumGen fetched: ', ['last_number' => $seq->last_number]);
+                $last_number = $seq->last_number + 1;
+                $seq->update(['last_number' => $last_number]);
+
+                // $venue = Venue::find($model->venue_id);
+                // $location = Location::find($model->location_id);
+
+                // $venue_short_name = $venue->short_name ?? 'VENUE';
+                // $location_name = $location->title ?? 'LOCATION';
+
+                $model->ref_number = 'MPBS-'. str_pad($last_number, 10, '0', STR_PAD_LEFT);
+            });
+        });
+    }
+
 
     public function service()
     {

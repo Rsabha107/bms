@@ -18,7 +18,7 @@
             <!-- <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_event_modal"><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_event', 'Create Event') ?>"><i class="bx bx-plus"></i></button></a> -->
         </div> --}}
     </div>
-    <h3 class="text-white mb-4">{{ $parent_menu }}</h3>
+    <h3 class="text-white mb-4">{{ $selected_menu_display }}</h3>
 
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">

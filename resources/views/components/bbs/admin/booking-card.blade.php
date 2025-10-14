@@ -13,7 +13,7 @@
                     data-url="{{ route('bbs.admin.booking.list')}}"
                     data-icons-prefix="bx"
                     data-icons="icons"
-                    data-show-export="true"
+                    data-show-export="false"
                     data-export-types="['csv', 'txt', 'doc', 'excel', 'xlsx', 'pdf']"
                     data-show-columns-toggle-all="true"
                     data-show-refresh="true"
@@ -38,6 +38,7 @@
                         <tr>
                             <!-- <th data-checkbox="true"></th> -->
                             <!-- <th data-sortable="true" data-field="id" class="align-middle white-space-wrap fw-bold fs-9"><?= get_label('id', 'ID') ?></th> -->
+                            <th data-sortable="true" data-field="ref_number">Ref Number</th>
                             <th data-sortable="false" data-field="created_by" >Broadcaster</th>
                             <th data-sortable="false" data-field="event_id" >Event</th>
                             <th data-sortable="false" data-field="venue_id" >Venue</th>

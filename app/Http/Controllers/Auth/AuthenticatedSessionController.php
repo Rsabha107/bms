@@ -22,7 +22,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('bbs.auth.sign-in');
+        return view('auth.sign-in');
     }
 
     /**
@@ -55,7 +55,7 @@ class AuthenticatedSessionController extends Controller
             if($otp->status === true){
                 $user->notify(new EmailOtpVerification($otp->token));
             }
-            return view('bbs/auth/otp');
+            return view('auth/otp');
         }
 
                 // //set the default workspace as set during user creation
