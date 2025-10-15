@@ -17,4 +17,9 @@ class Venue extends Model
     {
         return $this->belongsTo(GlobalStatus::class, 'active_flag');
     }
+
+    public function matches()
+    {
+        return $this->hasMany(Matches::class, 'venue_id');
+    }
 }

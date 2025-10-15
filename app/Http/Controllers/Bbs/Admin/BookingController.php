@@ -104,6 +104,7 @@ class BookingController extends Controller
                 'id' => $op->id,
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-9 ps-2">' .$op->id. '</div>',
                 'ref_number' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->ref_number . '</div>',
+                'organization_name' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->organization_name . '</div>',
                 'created_by' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->name . '</div>',
                 'event_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->event?->name . '</div>',
                 'venue_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->venue?->title . '</div>',
@@ -740,14 +741,14 @@ class BookingController extends Controller
         // return view('mds.admin.booking.pick', compact('events'));
         if ($request->event_id) {
             Log::info('Event ID: ' . $request->event_id);
-            if (MdsEvent::findOrFail($request->event_id) && !session()->has('EVENT_ID')) {
+            if (Event::findOrFail($request->event_id) && !session()->has('EVENT_ID')) {
                 Log::info('Inside if statement Event ID: ' . $request->event_id);
 
                 session()->put('EVENT_ID', $request->event_id);
                 Log::info('session EVENT_ID: ' . session()->get('EVENT_ID'));
                 Log::info('before redirect');
                 // return redirect()->route('tracki.project.show.card')->with('message', 'Workspace switched successfully.');
-                return redirect()->route('mds.admin.booking')->with('message', 'Event Switched.');
+                return redirect()->route('bbs.admin.booking')->with('message', 'Event Switched.');
                 // return back()->with('message', 'Event Switched.');
             }
         }
@@ -755,7 +756,7 @@ class BookingController extends Controller
         // return back()->with('error', 'Workspace not found.');
         // return redirect()->route('tracki.project.show.card')->with('error', 'Workspace not found.');
         Log::info('event_id is null');
-        return redirect()->route('mds.admin.booking')->with('error', 'Event not found.');
+        return redirect()->route('bbs.admin.booking')->with('error', 'Event not found.');
         // }
     }
 }

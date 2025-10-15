@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Bbs\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Mail\SendForgotPasswordMail;
+use App\Models\Bbs\Event as BbsEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,7 @@ use Exception;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 use TechEd\SimplOtp\SimplOtp;
 
 // use Brian2694\Toastr\Facades\Toastr;
@@ -285,22 +287,22 @@ class AdminController extends Controller
         }
 
         $todo_status_chart = Event::join('statuses', 'statuses.id', '=', 'events.event_status')
-        ->select('statuses.title as name', DB::raw("count(statuses.title) as value"))
-        ->groupBy('statuses.title')
-        ->when($workspace, function ($query, $workspace) {
-            return $query->where('events.workspace_id', $workspace);
-        })
-        ->having('value', '>', '0')
-        ->get();
+            ->select('statuses.title as name', DB::raw("count(statuses.title) as value"))
+            ->groupBy('statuses.title')
+            ->when($workspace, function ($query, $workspace) {
+                return $query->where('events.workspace_id', $workspace);
+            })
+            ->having('value', '>', '0')
+            ->get();
 
         $project_status_chart = Event::join('statuses', 'statuses.id', '=', 'events.event_status')
-        ->select('statuses.title as name', DB::raw("count(statuses.title) as value"))
-        ->groupBy('statuses.title')
-        ->when($workspace, function ($query, $workspace) {
-            return $query->where('events.workspace_id', $workspace);
-        })
-        ->having('value', '>', '0')
-        ->get();
+            ->select('statuses.title as name', DB::raw("count(statuses.title) as value"))
+            ->groupBy('statuses.title')
+            ->when($workspace, function ($query, $workspace) {
+                return $query->where('events.workspace_id', $workspace);
+            })
+            ->having('value', '>', '0')
+            ->get();
         // dump(vsprintf(str_replace(['?'], ['\'%s\''], $total_sales_by_month->toSql()), $total_sales_by_month->getBindings()));
 
         // dd($total_sales_by_month_array);
@@ -338,7 +340,7 @@ class AdminController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/mds/auth/login');
+        return redirect('/auth/login');
     } // End method
 
     public function login()
@@ -401,7 +403,7 @@ class AdminController extends Controller
         if (config('settings.otp_enabled')) {
 
             $otp = SimplOtp::generate($user->email);
-            if($otp->status === true){
+            if ($otp->status === true) {
                 $user->notify(new EmailOtpVerification($otp->token));
             }
             $notification = array(
@@ -418,6 +420,13 @@ class AdminController extends Controller
     {
         $events = MdsEvent::all();
         return view('auth.sign-up', compact('events'));
+    }
+
+    public function msSignUp()
+    {
+        $events = BbsEvent::all();
+        $roles = Role::all();
+        return view('auth.ms-sign-up', compact('events', 'roles'));
     }
 
     public function forgotPassword()

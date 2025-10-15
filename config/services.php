@@ -35,4 +35,13 @@ return [
         'api_key' => env('DIBSY_API_KEY'),
     ],
 
+
+    'microsoft' => [
+        'client_id' => env('MICROSOFT_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
+        'redirect' => env('MICROSOFT_REDIRECT_URI'),
+        'tenant' => env('MICROSOFT_TENANT_ID'),
+        'client_value' => env('MICROSOFT_CLIENT_VALUE'), // e.g. yourdomain.onmicrosoft.com
+    ],
+
 ];

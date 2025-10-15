@@ -7,6 +7,8 @@
                     style="{{ $style }}">
                     <option selected="selected" value="">Select {{ $label }}...</option>
                     @foreach ($forLoopCollection as $key => $item)
+                        {{-- {{ logger('selectedValue: '.$selectedValue) }}
+                        {{ logger('itemIdForeach: '.$$item->$itemIdForeach) }} --}}
                         <option value="{{ $item->$itemIdForeach }}" @if ($item->$itemIdForeach == $selectedValue) selected @endif>{{ $item->$itemTitleForeach }}</option>
                     @endforeach
                 </select>
@@ -25,14 +27,14 @@
     </div>
 @else
     <div class="{{ $class }}" style="{{ $style }}">
-        <label class="{{ $classLabel }}" for="{{ $elementId }}">{{ $label }}</label>
+        <label class="form-label" for="{{ $elementId }}">{{ $label }}</label>
         <select class="form-select" 
             name="{{ $name }}" 
             id="{{ $elementId }}" {{ $required }}
             style="{{ $style }}">
-            <option value="">Select {{ $label }}...</option>
+            <option value="909">Select {{ $label }}...</option>
             @foreach ($forLoopCollection as $key => $item)
-                <option value="{{ $item->$itemIdForeach }}">
+                <option value="{{ $item->$itemIdForeach }}"  @if ($item->$itemIdForeach == $selectedValue) selected @endif>
                     {{ $item->$itemTitleForeach }}
                 </option>
             @endforeach

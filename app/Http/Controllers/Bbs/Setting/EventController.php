@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\GlobalStatus;
 use App\Models\Bbs\GlobalYN;
 use App\Models\Bbs\Event;
+use App\Models\Bbs\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,85 +18,87 @@ class EventController extends Controller
     //
     public function index()
     {
-        $statuses = Event::all();
-        return view('bbs.setting.event.list', compact('statuses'));
+        $events = Event::all();
+        $venues = Venue::all();
+        return view('bbs.setting.event.list', compact('events', 'venues'));
     }
 
     public function get($id)
     {
         $op = Event::findOrFail($id);
-        return response()->json(['op' => $op]);
+        $image_path = Storage::path('private/bbs/event/logo/' . $op->event_logo);
+        return response()->json(['op' => $op, 'venues' => $op->venues, 'image_path' => $image_path]);
     }
 
-    public function update(Request $request)
-    {
-        $rules = [
-            'id' => ['required'],
-            'name' => 'required',
-            'active_flag' => 'required',
-        ];
+    // public function update(Request $request)
+    // {
+    //     $rules = [
+    //         'id' => ['required'],
+    //         'name' => 'required',
+    //         'active_flag' => 'required',
+    //     ];
 
-        $validator = Validator::make($request->all(), $rules);
+    //     $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            // Log::info($validator->errors());
-            $error = true;
-            // $message = 'Employee not create.' . $op->id;
-            $message = implode($validator->errors()->all('<div>:message</div>'));
-        } else {
-            $op = Event::findOrFail($request->id);
+    //     if ($validator->fails()) {
+    //         // Log::info($validator->errors());
+    //         $error = true;
+    //         // $message = 'Employee not create.' . $op->id;
+    //         $message = implode($validator->errors()->all('<div>:message</div>'));
+    //     } else {
+    //         $op = Event::findOrFail($request->id);
 
-            $error = false;
-            $message = 'Event ' . $op->name . ' successfully updated';
+    //         $error = false;
+    //         $message = 'Event ' . $op->name . ' successfully updated';
 
-            if ($request->hasFile('file_name')) {
+    //         if ($request->hasFile('file_name')) {
 
-                $file = $request->file('file_name');
-                $fileNameWithExt = $request->file('file_name')->getClientOriginalName();
-                // get file name
-                $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
-                // get extension
-                $extension = $request->file('file_name')->getClientOriginalExtension();
-    
-                $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-                $fileNameToStore = rand() . date('ymdHis') . $file->getClientOriginalName();  // use this
-    
-                Log::info($fileNameWithExt);
-                Log::info($filename);
-                Log::info($extension);
-                Log::info($fileNameToStore);
-    
-                // upload
-                if ($op->event_logo != 'default.png') {
-                    Storage::delete('bbs/event/logo/' . $op->event_logo);
-                }
-    
-                // $path = $request->file('file_name')->storeAs('private/mds/event/logo', $fileNameToStore);
-                Storage::disk('private')->putFileAs('bbs/event/logo', $file, $fileNameToStore);
+    //             $file = $request->file('file_name');
+    //             $fileNameWithExt = $request->file('file_name')->getClientOriginalName();
+    //             // get file name
+    //             $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+    //             // get extension
+    //             $extension = $request->file('file_name')->getClientOriginalExtension();
 
-                // $path = $file->move('upload/profile_images/', $fileNameToStore);
-                // Log::info($path);
-    
-    
-            } else {
-                $fileNameToStore = 'noimage.jpg';
-            }
-    
-            $op->event_logo = $fileNameToStore;
+    //             $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+    //             $fileNameToStore = rand() . date('ymdHis') . $file->getClientOriginalName();  // use this
 
-            
-            $op->name = $request->name;
-            $op->active_flag = $request->active_flag;
-            $op->updated_by = auth()->user()->id;
+    //             Log::info($fileNameWithExt);
+    //             Log::info($filename);
+    //             Log::info($extension);
+    //             Log::info($fileNameToStore);
 
-            $op->save();
-        }
+    //             // upload
+    //             if ($op->event_logo != 'default.png') {
+    //                 Storage::delete('bbs/event/logo/' . $op->event_logo);
+    //             }
 
-        return response()->json([
-            'error' => $error,
-            'message' => $message,
-        ]);
-    }
+    //             // $path = $request->file('file_name')->storeAs('private/mds/event/logo', $fileNameToStore);
+    //             Storage::disk('private')->putFileAs('bbs/event/logo', $file, $fileNameToStore);
+
+    //             // $path = $file->move('upload/profile_images/', $fileNameToStore);
+    //             // Log::info($path);
+
+
+    //         } else {
+    //             $fileNameToStore = 'noimage.jpg';
+    //         }
+
+    //         $op->event_logo = $fileNameToStore;
+
+
+    //         $op->name = $request->name;
+    //         $op->active_flag = $request->active_flag;
+    //         $op->updated_by = auth()->user()->id;
+
+    //         $op->save();
+    //     }
+
+    //     return response()->json([
+    //         'error' => $error,
+    //         'message' => $message,
+    //     ]);
+    // }
 
     public function list()
     {
@@ -131,17 +134,26 @@ class EventController extends Controller
             }
 
             $div_action = '<div class="font-sans-serif btn-reveal-trigger position-static">';
-            $update_action =
-                '<a href="javascript:void(0)" class="btn btn-sm" id="editEvents" data-id=' . $op->id .
-                ' data-table="event_table" data-bs-toggle="tooltip" data-bs-placement="right" title="Update">' .
-                '<i class="fa-solid fa-pen-to-square text-primary"></i></a>';
+            // $update_action =
+            //     '<a href="javascript:void(0)" class="btn btn-sm" id="editEvents" data-id=' . $op->id .
+            //     ' data-table="event_table" data-bs-toggle="tooltip" data-bs-placement="right" title="Update">' .
+            //     '<i class="fa-solid fa-pen-to-square text-primary"></i></a>';
             $delete_action =
                 '<a href="javascript:void(0)" class="btn btn-sm" data-table="event_table" data-id="' .
                 $op->id .
                 '" id="deleteEvent" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
                 '<i class="fa-solid fa-trash text-danger"></i></a></div></div>';
+            $update_action =
+                '<a href="javascript:void(0)" class="btn btn-sm" id="editEvents" data-id=' . $op->id .
+                ' data-table="event_table" data-bs-toggle="tooltip" data-bs-placement="right" title="Update">' .
+                '<i class="fa-solid fa-pen-to-square text-primary"></i></a>';
 
-
+            $venues_display = '';
+            appLog($op);
+            appLog($op->venues);
+            foreach ($op->venues as $venue) {
+                $venues_display .= '<span class="badge badge-pill bg-body-tertiary">' . $venue->short_name . '</span> ';
+            }
             // $actions = $div_action . $profile_action;
 
 
@@ -150,6 +162,7 @@ class EventController extends Controller
                 'image' => $image,
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-10 ps-2">' .$op->id. '</div>',
                 'title' => '<div class="align-middle white-space-wrap fs-9 ps-3">' . $op->name . '</div>',
+                'venues' => $venues_display,
                 'status' => '<span class="badge badge-phoenix fs--2 align-middle white-space-wrap ms-3 badge-phoenix-' . $op->active_status->color . ' " style="cursor: pointer;" id="editDriverStatus" data-id="' . $op->id . '" data-table="drivers_table"><span class="badge-label">' . $op->active_status->name . '</span><span class="ms-1 uil-edit-alt" style="height:12.8px;width:12.8px;cursor: pointer;"></span></span>',
                 'actions' => $update_action . $delete_action,
                 'created_at' => format_date($op->created_at,  'H:i:s'),
@@ -163,6 +176,78 @@ class EventController extends Controller
         ]);
     }
 
+    // public function store(Request $request)
+    // {
+    //     //
+    //     // dd($request);
+    //     $user_id = Auth::user()->id;
+    //     $op = new Event();
+
+    //     $rules = [
+    //         'name' => 'required',
+    //     ];
+
+    //     $validator = Validator::make($request->all(), $rules);
+
+    //     if ($validator->fails()) {
+    //         Log::info($validator->errors());
+    //         $error = true;
+    //         $message = implode($validator->errors()->all('<div>:message</div>'));
+    //     } else {
+
+    //         Log::info($request->all());
+    //         if ($request->hasFile('file_name')) {
+
+    //             $file = $request->file('file_name');
+    //             $fileNameWithExt = $request->file('file_name')->getClientOriginalName();
+    //             // get file name
+    //             $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+    //             // get extension
+    //             $extension = $request->file('file_name')->getClientOriginalExtension();
+
+    //             $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+    //             $fileNameToStore = rand() . date('ymdHis') . $file->getClientOriginalName();  // use this
+
+    //             Log::info($fileNameWithExt);
+    //             Log::info($filename);
+    //             Log::info($extension);
+    //             Log::info($fileNameToStore);
+
+    //             // $path = $request->file('file_name')->storeAs('private/mds/event/logo', $fileNameToStore);
+    //             Storage::disk('private')->putFileAs('bbs/event/logo', $file, $fileNameToStore);
+
+    //             // $path = $file->move('upload/profile_images/', $fileNameToStore);
+    //             // Log::info($path);
+
+
+    //         } else {
+    //             $fileNameToStore = 'noimage.jpg';
+    //         }
+
+    //         $op->event_logo = $fileNameToStore;
+
+    //         $error = false;
+    //         $message = 'Event created succesfully.' . $op->id;
+
+    //         $op->name = $request->name;
+    //         $op->active_flag = 1;
+    //         $op->created_at = $user_id;
+    //         $op->updated_at = $user_id;
+    //         $op->created_by = $user_id;
+    //         $op->updated_by = $user_id;
+    //         $op->active_flag = 1;
+
+    //         $op->save();
+    //     }
+
+    //     $notification = array(
+    //         'message'       => 'Event created successfully',
+    //         'alert-type'    => 'success'
+    //     );
+
+    //     return response()->json(['error' => $error, 'message' => $message]);
+    // }
+
     public function store(Request $request)
     {
         //
@@ -172,63 +257,148 @@ class EventController extends Controller
 
         $rules = [
             'name' => 'required',
+            'file_name' => 'sometimes|file|mimes:jpeg,png,jpg|max:2048',
         ];
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            Log::info($validator->errors());
+            appLog('validator: ' . $validator->errors());;
             $error = true;
             $message = implode($validator->errors()->all('<div>:message</div>'));
         } else {
 
-            Log::info($request->all());
             if ($request->hasFile('file_name')) {
-    
+
                 $file = $request->file('file_name');
                 $fileNameWithExt = $request->file('file_name')->getClientOriginalName();
                 // get file name
                 $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
                 // get extension
                 $extension = $request->file('file_name')->getClientOriginalExtension();
-    
+
                 $fileNameToStore = $filename . '_' . time() . '.' . $extension;
                 $fileNameToStore = rand() . date('ymdHis') . $file->getClientOriginalName();  // use this
 
-                Log::info($fileNameWithExt);
-                Log::info($filename);
-                Log::info($extension);
-                Log::info($fileNameToStore);
-    
+                appLog($fileNameWithExt);
+                appLog($filename);
+                appLog($extension);
+                appLog($fileNameToStore);
+
                 // $path = $request->file('file_name')->storeAs('private/mds/event/logo', $fileNameToStore);
                 Storage::disk('private')->putFileAs('bbs/event/logo', $file, $fileNameToStore);
-
-                // $path = $file->move('upload/profile_images/', $fileNameToStore);
-                // Log::info($path);
-    
-    
             } else {
                 $fileNameToStore = 'noimage.jpg';
             }
-    
+
             $op->event_logo = $fileNameToStore;
-            
             $error = false;
             $message = 'Event created succesfully.' . $op->id;
 
             $op->name = $request->name;
             $op->active_flag = 1;
-            $op->created_at = $user_id;
-            $op->updated_at = $user_id;
             $op->created_by = $user_id;
             $op->updated_by = $user_id;
-            $op->active_flag = 1;
 
             $op->save();
+
+            if ($request->venue_id) {
+                foreach ($request->venue_id as $key => $data) {
+                    $op->venues()->attach($request->venue_id[$key]);
+                }
+            }
         }
 
         $notification = array(
             'message'       => 'Event created successfully',
+            'alert-type'    => 'success'
+        );
+
+        return response()->json(['error' => $error, 'message' => $message]);
+    }
+
+        public function update(Request $request)
+    {
+        //
+        // dd($request);
+        $user_id = Auth::user()->id;
+        $op = Event::findOrFail($request->id);
+        if (!$op) {
+            return response()->json(['error' => true, 'message' => 'Event not found.']);
+        }
+
+        $rules = [
+            'name' => 'required',
+            'active_flag' => 'required',
+            'id' => 'required|exists:events,id',
+            'venue_id' => 'array',
+            'venue_id.*' => 'exists:venues,id',
+            'file_name' => 'sometimes|file|mimes:jpeg,png,jpg|max:2048',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            appLog('validator: ' . $validator->errors());;
+            $error = true;
+            $message = implode($validator->errors()->all('<div>:message</div>'));
+        } else {
+
+            if ($request->hasFile('file_name')) {
+
+                $file = $request->file('file_name');
+                $fileNameWithExt = $request->file('file_name')->getClientOriginalName();
+                // get file name
+                $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+                // get extension
+                $extension = $request->file('file_name')->getClientOriginalExtension();
+
+                $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+                $fileNameToStore = rand() . date('ymdHis') . $file->getClientOriginalName();  // use this
+
+                appLog($fileNameWithExt);
+                appLog($filename);
+                appLog($extension);
+                appLog($fileNameToStore);
+
+                // upload
+                if ($op->event_logo != 'default.png') {
+                    Storage::delete('bbs/event/logo/' . $op->event_logo);
+                }
+
+                // $path = $request->file('file_name')->storeAs('private/mds/event/logo', $fileNameToStore);
+                Storage::disk('private')->putFileAs('bbs/event/logo', $file, $fileNameToStore);
+
+                // $path = $file->move('upload/profile_images/', $fileNameToStore);
+
+            } else {
+                // Storage::disk('private')->delete('vapp/event/logo/' . $op->event_logo);
+                $fileNameToStore = 'noimage.jpg';
+            }
+
+            $op->event_logo = $fileNameToStore;
+
+            $error = false;
+            $message = 'Event updated succesfully.';
+
+            $op->name = $request->name;
+            $op->active_flag = $request->active_flag;
+            $op->updated_by = $user_id;
+
+            $op->save();
+
+            if ($op->venues) {
+                $op->venues()->detach();
+            }
+            if ($request->venue_id) {
+                foreach ($request->venue_id as $key => $data) {
+                    $op->venues()->attach($request->venue_id[$key]);
+                }
+            }
+        }
+
+        $notification = array(
+            'message'       => 'Event updated successfully',
             'alert-type'    => 'success'
         );
 
@@ -257,7 +427,7 @@ class EventController extends Controller
         $file_path = 'app/private/bbs/event/logo/' . $file;
         $path = storage_path($file_path);
 
-        Log::info('path: '.$path);
+        Log::info('path: ' . $path);
 
         return response()->file($path);
     }
@@ -267,7 +437,7 @@ class EventController extends Controller
         $event = Event::find($id);
         $global_yn = GlobalYN::all();
         $global_status = GlobalStatus::all();
-        
+
         $file_path = 'app/private/bbs/event/logo/';
 
         $file_path = $file_path . $event->event_logo;
@@ -284,8 +454,8 @@ class EventController extends Controller
         }
 
         // Log::info($url);
-        Log::info('path: '.$event_logo);
-        Log::info('path: '.$path);
+        Log::info('path: ' . $event_logo);
+        Log::info('path: ' . $path);
 
         // return response()->file($path);
         // Log::info(response()->file('/app/private/bbs/event/logo/'.$event->event_logo));

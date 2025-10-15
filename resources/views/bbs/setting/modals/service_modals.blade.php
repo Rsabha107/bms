@@ -30,7 +30,7 @@
         </span>
     </a>
     <x-setting.admin-service-drawer id="" formAction="{{ route('bbs.setting.service.store') }}"
-        formId="add_service_form" :broadcast_services="$broadcast_services"
+        formId="add_service_form" :broadcast_services="$broadcast_services" :menus="$menus"
         />
 </div>
 

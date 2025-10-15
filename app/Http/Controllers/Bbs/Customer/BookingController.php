@@ -19,6 +19,7 @@ use App\Models\Mds\DeliveryVenue;
 use App\Models\Bbs\BroadcastService;
 use App\Models\Bbs\Event;
 use App\Models\Bbs\Matches;
+use App\Models\Bbs\MatchServiceAvailability;
 use App\Models\Bbs\MenuItem;
 use App\Models\Mds\DeliveryZone;
 use App\Models\Mds\MdsDriver;
@@ -67,9 +68,9 @@ class BookingController extends Controller
 
     public function list()
     {
-        Log::info('BookingController::list request: ' . json_encode(request()->all()));
-        Log::info('session()->all(): ' . json_encode(session()->all()));
-        Log::info('session()->get(EVENT_ID): ' . session()->get('EVENT_ID'));
+        // Log::info('BookingController::list request: ' . json_encode(request()->all()));
+        // Log::info('session()->all(): ' . json_encode(session()->all()));
+        // Log::info('session()->get(EVENT_ID): ' . session()->get('EVENT_ID'));
         $search = request('search');
         $sort = (request('sort')) ? request('sort') : "id";
         $order = (request('order')) ? request('order') : "DESC";
@@ -129,6 +130,7 @@ class BookingController extends Controller
                 'id' => $op->id,
                 'ref_number' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->ref_number . '</div>',
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-9 ps-2">' .$op->id. '</div>',
+                'organization_name' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->organization_name . '</div>',
                 'created_by' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->name . '</div>',
                 'event_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->event?->name . '</div>',
                 'venue_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->venue?->title . '</div>',
@@ -147,6 +149,16 @@ class BookingController extends Controller
             "rows" => $ops->items(),
             "total" => $total,
         ]);
+    }
+
+    public function getServiceAvailability(Request $request)
+    {
+        Log::info('BookingController::getServiceAvailability request: ' . json_encode($request->all()));
+        $service = MatchServiceAvailability::where('service_id', $request->service_id)
+            ->where('match_id', $request->match_id)
+            ->get();
+
+        return response()->json(['service' => $service]);
     }
 
     public function showServices($id)
@@ -170,7 +182,8 @@ class BookingController extends Controller
             ->with('children.children') // recursive depth
             ->orderBy('order_number')
             ->get();
-        $venues = Venue::all();
+        $event = Event::find(session()->get('EVENT_ID'));
+        $venues = $event?->venues;
         $matches = Matches::all();
 
         session()->put($selected_menu_db->link, 'active');
@@ -185,6 +198,15 @@ class BookingController extends Controller
             compact('services', 'menus', 'selected_menu_display', 'venues', 'matches')
         );
     }
+
+    function getMatchesByVenue(Request $request)
+    {
+        Log::info('BookingController::getMatchesByVenue request: ' . json_encode($request->all()));
+        $matches = Matches::where('venue_id', $request->venue_id)->get();
+
+        return response()->json(['matches' => $matches]);
+    }
+
     public function listService()
     {
         $selected_menu_display = 'All Services';
@@ -227,8 +249,9 @@ class BookingController extends Controller
         DB::beginTransaction();
         try {
             $op = BroadcastBooking::find($id);
-            $service = BroadcastService::find($op->service_id);
-            $groupKey = $service->group_key;
+            $service_availability = MatchServiceAvailability::where('service_id', $op->service_id)
+            ->where('match_id', $op->match_id)->first();
+            $groupKey = $service_availability?->group_key;
             $current_booking_quantity = $op->quantity;
 
             Log::info('service available_slots before delete: ' . $current_booking_quantity);
@@ -245,16 +268,14 @@ class BookingController extends Controller
             Log::info('broadcast service id: ' . $id);
 
             if ($groupKey) {
-                BroadcastService::where('group_key', $groupKey)
-                    ->where('id', '!=', $service->id)
+                MatchServiceAvailability::where('group_key', $groupKey)
+                    ->where('id', '!=', $service_availability->id)
+                    ->where('match_id', $op->match_id)
                     ->update(['available_slots' => DB::raw('available_slots + ' . $current_booking_quantity), 'used_slots' => DB::raw('used_slots - ' . $current_booking_quantity)]);
             }
-            
-            $service->increment('available_slots', intval($current_booking_quantity));
-            $service->decrement('used_slots', intval($current_booking_quantity));
 
-
-            // $service->save();
+            $service_availability->increment('available_slots', intval($current_booking_quantity));
+            $service_availability->decrement('used_slots', intval($current_booking_quantity));
 
             $op->delete();
 
@@ -292,12 +313,6 @@ class BookingController extends Controller
         return view('bbs.customer.booking.detail', compact('booking'));
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
-
-
     public function storeService(Request $request)
     {
         // return redirect()->back()->with('error', 'Not enough available slots for the selected service.');
@@ -332,12 +347,18 @@ class BookingController extends Controller
         try {
             DB::transaction(function () use ($request, $user) {
                 // lock the service row for update
-                $service = BroadcastService::where('id', $request->service_id)->lockForUpdate()->first();
-                $groupKey = $service->group_key;
-                Log::info('service available_slots: ' . $service->available_slots);
+                // $service = BroadcastService::where('id', $request->service_id)->lockForUpdate()->first();
+                $service_availability = MatchServiceAvailability::where('service_id', $request->service_id)
+                    ->where('match_id', $request->match_id)
+                    ->lockForUpdate()->first();
+
+                Log::info('service availability: ' . json_encode($service_availability));
+
+                $groupKey = $service_availability?->group_key;
+                Log::info('service available_slots: ' . $service_availability?->available_slots);
                 Log::info('request quantity: ' . $request->quantity);
 
-                if (!$service || $service->available_slots < $request->quantity) {
+                if (!$service_availability || $service_availability->available_slots < $request->quantity) {
                     $message = 'Not enough available slots for the selected service.';
                     throw new \Exception($message);
                 }
@@ -360,13 +381,14 @@ class BookingController extends Controller
                 $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
                 $service = BroadcastService::find($request->service_id);
 
-                $service->decrement('available_slots', $request->quantity);
-                $service->increment('used_slots', $request->quantity);
+                $service_availability->decrement('available_slots', $request->quantity);
+                $service_availability->increment('used_slots', $request->quantity);
 
                 // sync all items in the same group
                 if ($groupKey) {
-                    BroadcastService::where('group_key', $groupKey)
-                        ->where('id', '!=', $service->id)
+                    MatchServiceAvailability::where('group_key', $groupKey)
+                        ->where('id', '!=', $service_availability->id)
+                        ->where('match_id', $request->match_id)
                         ->update(['available_slots' => DB::raw('available_slots - ' . $request->quantity), 'used_slots' => DB::raw('used_slots + ' . $request->quantity)]);
                 }
 
@@ -398,26 +420,6 @@ class BookingController extends Controller
             return redirect()->back()->with($notification);
         }
     }
-
-    // public function cart()
-    // {
-    //     // Fetch bookings for the logged-in user
-    //     $bookings = BroadcastBooking::with('service')
-    //         ->where('created_by', Auth::user()->id)
-    //         ->get();
-
-    //     // Check user role
-    //     if (Auth::user()->hasRole('SuperAdmin')) {
-    //         // Show admin cart view
-    //         return view('bbs.admin.booking.cart', compact('bookings'));
-    //     } elseif (Auth::user()->hasRole('Customer')) {
-    //         // Show customer cart view
-    //         return view('bbs.customer.booking.cart', compact('bookings'));
-    //     } else {
-    //         // Optional: redirect other roles or throw error
-    //         abort(403, 'Unauthorized');
-    //     }
-    // }
 
     public function update(Request $request)
     {
@@ -528,14 +530,6 @@ class BookingController extends Controller
 
 
         // return response()->json(['error' => $error, 'message' => $message]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
     public function save_pass_pdf($booking)

@@ -15,11 +15,24 @@
 
                         <div class="row mb-3">
 
-                            <div class="text-center mb-3">
+                            {{-- <div class="text-center mb-3">
                                 <div class="mb-3 text-start">
                                     <input type="file" name="file_name" class="dropify"
                                         data-height="200"
                                         data-default-file="{{ !empty($user->photo) ? url('storage/upload/profile_images/' . $user->photo) : url('upload/default.png') }}" />
+                                </div>
+                            </div> --}}
+
+                            <div class="row mb-3">
+                                <div class="col-sm-6 col-md-12">
+                                    <label class="form-label" for="add_menu_item_id">Menu Item</label>
+                                    <select class="form-select" id="add_menu_item_id" name="menu_item_id" data-with="100%"
+                                        data-placeholder="Select menu...">
+                                        <option value="" selected>Select Menu Item</option>
+                                        @foreach ($menus as $menu)
+                                        <option value="{{ $menu->id }}">{{ $menu->title }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
 

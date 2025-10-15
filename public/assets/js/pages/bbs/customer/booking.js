@@ -1,27 +1,158 @@
-$(document).ready(function () {
-    // Show ADD offcanvas
-    $("body").on("click", "#offcanvas-add-parking-variation", function () {
-        console.log("inside #offcanvas-add-project");
+// $(document).ready(function () {
+//     // Show ADD offcanvas
+//     $("body").on("click", "#offcanvas-add-parking-variation", function () {
+//         console.log("inside #offcanvas-add-project");
 
-        var event_id = $(this).data("id");
-        $("#add_event_id").val(event_id);
-        // $("#add_edit_form").get(0).reset()
-        // console.log(window.choices.removeActiveItems())
-        $("#cover-spin").show();
-        $("#offcanvas-add-parking-variation-modal").offcanvas("show");
-        $("#cover-spin").hide();
+//         var event_id = $(this).data("id");
+//         $("#add_event_id").val(event_id);
+//         // $("#add_edit_form").get(0).reset()
+//         // console.log(window.choices.removeActiveItems())
+//         $("#cover-spin").show();
+//         $("#offcanvas-add-parking-variation-modal").offcanvas("show");
+//         $("#cover-spin").hide();
+//     });
+//     // Show EDIT offcanvas
+//         $("body").on("click", "#showNavbarNav", function () {
+//         console.log("inside #offcanvas-add-project");
+
+//         var event_id = $(this).data("id");
+//         $("#add_event_id").val(event_id);
+//         // $("#add_edit_form").get(0).reset()
+//         // console.log(window.choices.removeActiveItems())
+//         $("#cover-spin").show();
+//         $("#navbarNav").offcanvas("show");
+//         $("#cover-spin").hide();
+//     });
+// });
+
+// $("body").on("change", "#select_match_id", function (e) {
+//     console.log("inside select_match_id");
+//     var match_id = $(this).val();
+//     var venue_id = $("#select_venue_id").val();
+//     var service_id = $("#service_id").val();
+//     console.log("match_id", match_id);
+//     console.log("venue_id", venue_id);
+//     console.log("service_id", service_id);
+//     $.ajax({
+//         url: "/get-service-variation",
+//         type: "GET",
+//         data: {
+//             match_id: match_id,
+//             venue_id: venue_id,
+//             service_id: service_id,
+//         },
+//         dataType: "json",
+//         success: function (response) {
+//             console.log("response", response);
+//         },
+//         error: function (xhr, ajaxOptions, thrownError) {
+//             console.log(xhr.status);
+//             console.log(thrownError);
+//         },
+//     });
+
+// });
+
+$("body").on("change", "#select_venue_id", function (e) {
+    console.log("inside select_venue_id");
+    var venue_id = $(this).val();
+    var card = $(this).closest(".service-card");
+    var match_select = card.find('select[name="match_id"]');
+    match_select.empty(); // Clear previous options
+    match_select.append('<option value="">Select Match</option>'); // Add default option
+    console.log("venue_id", venue_id);
+    $.ajax({
+        url: "/get-matches-by-venue",
+        type: "GET",
+        data: {
+            venue_id: venue_id,
+        },
+        dataType: "json",
+        success: function (response) {
+            console.log("response", response);
+            if (response.matches && response.matches.length > 0) {
+                response.matches.forEach(function (match) {
+                    match_select.append(
+                        '<option value="' +
+                            match.id +
+                            '">' +
+                            match.match_code +
+                            " ( " +
+                            match.match_date +
+                            " )</option>"
+                    );
+                });
+            } else {
+                match_select.append(
+                    '<option value="">No matches available</option>'
+                );
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+        },
     });
-    // Show EDIT offcanvas
-        $("body").on("click", "#showNavbarNav", function () {
-        console.log("inside #offcanvas-add-project");
+});
 
-        var event_id = $(this).data("id");
-        $("#add_event_id").val(event_id);
-        // $("#add_edit_form").get(0).reset()
-        // console.log(window.choices.removeActiveItems())
-        $("#cover-spin").show();
-        $("#navbarNav").offcanvas("show");
-        $("#cover-spin").hide();
+$("body").on("change", "#select_match_id", function (e) {
+    console.log("inside select_match_id");
+    var match_id = $(this).val();
+
+    const card = $(this).closest(".service-card");
+
+    var venue_id = card.find('select[name="venue_id"]').val();
+    var service_id = card.find('input[name="service_id"]').val();
+    var available_slots_div = card.find("#available_slots");
+    var quantity_input = card.find('input[name="quantity"]');
+    quantity_input.val(1); // reset quantity to 1 on match change
+    available_slots_div.html(""); // clear available slots on match change
+    // var match_id = $("#select_match_id").val();
+
+    // var venue_id = $("#select_venue_id").val();
+    // var service_id = $("#service_id").val();
+    console.log("match_id", match_id);
+    console.log("venue_id", venue_id);
+    console.log("service_id", service_id);
+    $.ajax({
+        url: "/get-service-details",
+        type: "GET",
+        data: {
+            match_id: match_id,
+            venue_id: venue_id,
+            service_id: service_id,
+        },
+        dataType: "json",
+        success: function (response) {
+            console.log("response", response);
+            let badge_bg_color =
+                response.service[0].available_slots > 0 ? "success" : "danger";
+            let available_slots =
+                '<span class="badge bg-' +
+                badge_bg_color +
+                ' rounded-pill px-3 py-2 bounce-badge">' +
+                response.service[0].available_slots +
+                " available" +
+                "</span>";
+            quantity_input.attr(
+                "max",
+                response.service[0].available_slots
+            );
+            available_slots_div.html(available_slots);
+            const badge = available_slots_div.find(".bounce-badge");
+            console.log(badge);
+            if (badge.length === 0) {
+                console.log("Badge element not found.");
+                return; // Exit if badge element is not found
+            }
+            badge.removeClass("bounce"); // reset previous animation
+            void badge[0].offsetWidth; // force reflow (important!)
+            badge.addClass("bounce"); // trigger animation again
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+        },
     });
 });
 

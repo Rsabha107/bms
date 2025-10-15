@@ -18,7 +18,7 @@ class EventImageController extends Controller
     //
     public function getPrivateFile($file)
     {
-        $file_path = 'app/private/mds/event/logo/' . $file;
+        $file_path = 'app/private/bbs/event/logo/' . $file;
         $path = storage_path($file_path);
 
         Log::info('path: '.$path);

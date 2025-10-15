@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class Matches extends Model
 {
     use HasFactory;
-    protected $table="bbs_matches";
+    protected $table="matches";
+    // protected $table="bbs_matches";
     protected $guarded = [];
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Mds\Customer;
+namespace App\Http\Controllers\Bbs\Customer;
 
 use App\Http\Controllers\Controller;
 use App\DataTables\UsersDataTable;

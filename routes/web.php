@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\MicrosoftController;
 use App\Http\Controllers\ChartsController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\GeneralSettings\AttachmentController;
@@ -10,15 +11,17 @@ use App\Http\Controllers\Bbs\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Bbs\Setting\EventController;
 use App\Http\Controllers\Bbs\Auth\AdminController as AuthAdminController;
 use App\Http\Controllers\Bbs\Customer\BookingController as CustomerBookingController;
-use App\Http\Controllers\Mds\Setting\AppSettingController;
-use App\Http\Controllers\Mds\Setting\EventImageController;
+use App\Http\Controllers\Bbs\Setting\AppSettingController;
+use App\Http\Controllers\Bbs\Setting\EventImageController;
 use App\Http\Controllers\Bbs\Setting\ServiceController;
-use App\Http\Controllers\Mds\Setting\ServiceImageController;
+use App\Http\Controllers\Bbs\Setting\ServiceImageController;
 use App\Http\Controllers\StatusController;
 
 use App\Http\Controllers\Bbs\Setting\VenueController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Bbs\Admin\ImportExportController;
+use App\Http\Controllers\Bbs\Setting\VariationController;
+use App\Http\Controllers\Bbs\Customer\UserController;
 use App\Http\Controllers\UtilController;
 
 /*
@@ -51,19 +54,44 @@ Route::get('/', function () {
     }
 })->name('home');
 
+
+Route::controller(MicrosoftController::class)->group(function () {
+    Route::get('auth/microsoft', 'redirectToMicrosoft')->name('auth.microsoft');
+    Route::get('auth/microsoft/callback', 'handleMicrosoftCallback');
+});
+
 // 'XssSanitizer'
 
 Route::group(['middleware' => 'prevent-back-history'], function () {
 
     Route::middleware(['auth', 'otp', 'mutli.event', 'role:SuperAdmin', 'prevent-back-history', 'auth.session'])->group(function () {
 
+        // Service variation
+        Route::controller(VariationController::class)->group(function () {
+            Route::get('/bbs/setting/service/variation', 'index')->name('bbs.setting.service.variation');
+            Route::get('/bbs/setting/service/variation/list', 'list')->name('bbs.setting.service.variation.list');
+            Route::get('/bbs/setting/service/variation/get/{id}', 'get')->name('bbs.setting.service.variation.get');
+            Route::post('bbs/setting/service/variation/update', 'update')->name('bbs.setting.service.variation.update');
+            Route::delete('/bbs/setting/service/variation/delete/{id}', 'delete')->name('bbs.setting.service.variation.delete');
+            Route::post('/bbs/setting/service/variation/store', 'store')->name('bbs.setting.service.variation.store');
+            // add inventroy to this variation
+            Route::post('/bbs/setting/inventory/variation/store', 'inventory_store')->name('bbs.setting.inventory.variation.store');
+            Route::get('/bbs/setting/inventory/variation/get/{id}', 'get_inventory_variation_info')->name('bbs.setting.inventory.variation.get');
+            // end inventroy to this variation
+
+            Route::get('/bbs/setting/service/variation/mv/get/{id}', 'getView')->name('bbs.setting.service.variation.get.mv');
+
+            // functional areas and bbs sizes associated with service code
+            Route::get('/bbs/setting/service/code/functional_areas/{id}', 'getAssicatedFunctionalAreas')->name('bbs.setting.service.code.functional_areas');
+            Route::get('bbs_get_parking_code_from_event/{id}', 'getParkingCodeFromEvent')->name('bbs.setting.parking.code.get_from_event');
+        });
 
         // Broadcast Booking Routes
         Route::controller(AdminBookingController::class)->group(function () {
             Route::get('/bbs/admin/booking', 'index')->name('bbs.admin.booking');
             Route::get('/bbs/admin/booking/list', 'list')->name('bbs.admin.booking.list');
             Route::get('/bbs/admin/booking/detail/{id}', 'detail')->name('bbs.admin.booking.detail');
-            Route::delete('/bbs/admin/booking/delete/{id}',  'deleteBooking')->name('bbs.admin.booking.delete');
+            Route::delete('/bbs/admin/booking/delete/{id}', 'delete')->name('bbs.admin.booking.delete');
             Route::post('bbs/admin/booking/cart/store', 'storeService')->name('admin.booking.cart.store');
         });
         // Broadcast Service
@@ -93,12 +121,15 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
     // Setting ROUTE ******************************************************************** Admin All Route
     Route::middleware(['auth', 'otp', 'mutli.event', 'XssSanitizer', 'role:SuperAdmin', 'roles:admin', 'prevent-back-history', 'auth.session'])->group(function () {
 
-                    //Import and Export
-            Route::controller(ImportExportController::class)->group(function () {
-                Route::get('/bbs/admin/booking/import', 'showImportForm')->name('bbs.admin.import.show.form');
-                Route::post('/bbs/admin/booking/import', 'import')->name('bbs.admin.import.store');
-                Route::post('/bbs/admin/booking/export', 'export')->name('bbs.admin.export');
-            });
+        Route::get('/auth/ms-signup', [AuthAdminController::class, 'msSignUp'])->name('auth.ms.signup');
+        Route::post('/signup/ms/store', [AdminUserController::class, 'msStore'])->name('admin.signup.ms.store');
+
+        //Import and Export
+        Route::controller(ImportExportController::class)->group(function () {
+            Route::get('/bbs/admin/booking/import', 'showImportForm')->name('bbs.admin.import.show.form');
+            Route::post('/bbs/admin/booking/import', 'import')->name('bbs.admin.import.store');
+            Route::post('/bbs/admin/booking/export', 'export')->name('bbs.admin.export');
+        });
 
         Route::controller(ServiceController::class)->group(function () {
             Route::get('/bbs/setting/service', 'index')->name('bbs.setting.service');
@@ -132,16 +163,6 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::post('/bbs/setting/venue/store', 'store')->name('bbs.setting.venue.store');
         });
 
-        // // Functional Area
-        // Route::controller(FunctionalAreaController::class)->group(function () {
-        //     Route::get('/bbs/setting/funcareas', 'index')->name('bbs.setting.funcareas');
-        //     Route::get('/bbs/setting/funcareas/list', 'list')->name('bbs.setting.funcareas.list');
-        //     Route::get('/bbs/setting/funcareas/get/{id}', 'get')->name('bbs.setting.funcareas.get');
-        //     Route::post('/bbs/setting/funcareas/update', 'update')->name('bbs.setting.funcareas.update');
-        //     Route::delete('/bbs/setting/funcareas/delete/{id}', 'delete')->name('bbs.setting.funcareas.delete');
-        //     Route::post('/bbs/setting/funcareas/store', 'store')->name('bbs.setting.funcareas.store');
-        // });
-
         //Event
         Route::controller(EventController::class)->group(function () {
             Route::get('/bbs/setting/event', 'index')->name('bbs.setting.event');
@@ -164,51 +185,12 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::post('/bbs/setting/application/store', 'store')->name('bbs.setting.application.store');
         });
 
-        //Booking Status
-        // Route::controller(BookingStatusController::class)->group(function () {
-        //     Route::get('/mds/setting/status/booking', 'index')->name('mds.setting.status.booking');
-        //     Route::get('/mds/setting/status/booking/list', 'list')->name('mds.setting.status.booking.list');
-        //     Route::get('/mds/setting/status/booking/get/{id}', 'get')->name('mds.setting.status.booking.get');
-        //     Route::post('mds/setting/status/booking/update', 'update')->name('mds.setting.status.booking.update');
-        //     Route::delete('/mds/setting/status/booking/delete/{id}', 'delete')->name('mds.setting.status.booking.delete');
-        //     Route::post('/mds/setting/status/booking/store', 'store')->name('mds.setting.status.booking.store');
-        // });
 
         Route::controller(AdminUserController::class)->group(function () {
             Route::get('/bbs/admin/users/profile', 'profile')->name('bbs.admin.users.profile');
             Route::post('/bbs/admin/users/profile/update', 'update')->name('bbs.admin.users.profile.update');
             Route::post('/bbs/admin/users/profile/password/update', 'updatePassword')->name('bbs.admin.users.profile.password.update');
         });
-
-
-        // General Settings MANAGEMENT ******************************************************************** Admin All Route
-        // company Routes
-        // Route::controller(CompanyController::class)->group(function () {
-        //     Route::get('/general/settings/company/', 'index')->name('general.settings.company');
-        //     Route::post('/general/settings/update', 'update')->name('general.settings.update');
-        // });
-
-        // // Address Routes
-        // Route::controller(CompanyAddressController::class)->group(function () {
-        //     Route::get('/general/settings/address/', 'index')->name('general.settings.address');
-        //     Route::get('/general/settings/address/list/{id?}', 'list')->name('general.settings.address.list');
-        //     Route::get('/general/settings/address/mv/edit/{id}', 'getAddressEditView')->name('general.settings.address.mv.edit');
-        //     Route::post('/general/settings/address/update',  'update')->name('general.settings.address.update');
-        //     Route::get('/general/settings/address/add', 'add')->name('general.settings.address.add');
-        //     Route::post('/general/settings/address/store', 'store')->name('general.settings.address.store');
-        //     Route::get('general/settings/address/delete/{id}', 'delete')->name('general.settings.address.delete');
-        // });
-
-        // Currency Routes
-        // Route::controller(CurrencyController::class)->group(function () {
-        //     Route::get('/general/settings/currency/', 'index')->name('general.settings.currency');
-        //     Route::get('/general/settings/currency/list/{id?}', 'list')->name('general.settings.currency.list');
-        //     Route::get('/general/settings/currency/get/{id}', 'get')->name('general.settings.currency.get');
-        //     Route::post('/general/settings/currency/update',  'update')->name('general.settings.currency.update');
-        //     Route::get('/general/settings/currency/add', 'add')->name('general.settings.currency.add');
-        //     Route::post('/general/settings/currency/store', 'store')->name('general.settings.currency.store');
-        //     Route::get('general/settings/currency/delete/{id}', 'delete')->name('general.settings.currency.delete');
-        // });
     });
 
     // Customer ******************************************************************** user All Route
@@ -220,74 +202,32 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::get('/bbs/customer/booking/list', 'list')->name('bbs.customer.booking.list');
             Route::get('/bbs/customer/booking/service/list', 'listService')->name('bbs.customer.booking.service.list');
             Route::get('/bbs/customer/booking/detail/{id}', 'detail')->name('bbs.customer.booking.detail');
-            Route::get('/bbs/customer/booking/cart', 'cart')->name('bbs.customer.booking.cart');
-            Route::delete('/bbs/customer/booking/delete/{id}',  'deleteBooking')->name('bbs.customer.booking.delete');
+            // Route::get('/bbs/customer/booking/cart', 'cart')->name('bbs.customer.booking.cart');
             Route::post('bbs/customer/booking/cart/store', 'storeService')->name('customer.booking.cart.store');
             Route::get('/bbs/customer/booking/{id}/switch', 'venueSwitch')->name('bbs.customer.booking.switch');
             Route::get('bbs/customer/booking/{id}/switch', 'switch')->name('bbs.customer.booking.switch');
+            Route::get('/get-service-details', 'getServiceAvailability')->name('bbs.get.service.details');
+            Route::get('/get-matches-by-venue', 'getMatchesByVenue')->name('bbs.get.match.by.venue');
 
             Route::delete('/bbs/customer/booking/delete/{id}', 'delete')->name('bbs.customer.booking.delete');
 
             Route::get('/bbs/customer/booking/menu/{id}', 'showServices')->name('bbs.customer.booking.menu.show.services');
             Route::get('/bbs/customer/booking/menu', 'build_menu')->name('bbs.customer.booking.menu');
+        });
 
+        Route::controller(VariationController::class)->group(function () {
+            Route::get('/get-service-variation', 'get_variation_info')->name('bbs.get.variation.info');
+            // Route::post('/bbs/customer/checkout/process', 'processCheckout')->name('bbs.customer.checkout.process');
+            // Route::get('/bbs/customer/checkout/confirmation', 'confirmation')->name('bbs.customer.checkout.confirmation');
         });
 
 
-        Route::controller(CustomerUserController::class)->group(function () {
-            Route::get('/mds/customer/users/profile', 'profile')->name('mds.customer.users.profile');
-            Route::post('/mds/customer/users/profile/update', 'update')->name('mds.customer.users.profile.update');
-            Route::post('/mds/customer/users/profile/password/update', 'updatePassword')->name('mds.customer.users.profile.password.update');
+        Route::controller(UserController::class)->group(function () {
+            Route::get('/bbs/customer/users/profile', 'profile')->name('bbs.customer.users.profile');
+            Route::post('/bbs/customer/users/profile/update', 'update')->name('bbs.customer.users.profile.update');
+            Route::post('/bbs/customer/users/profile/password/update', 'updatePassword')->name('bbs.customer.users.profile.password.update');
         });
     });
-
-    // // Manager ******************************************************************** user All Route
-    // Route::middleware(['auth', 'otp', 'mutli.event', 'XssSanitizer', 'role:Manager', 'roles:user', 'prevent-back-history', 'auth.session'])->group(function () {
-
-    //     // Manager Booking Routes
-    //     Route::controller(ManagerBookingController::class)->group(function () {
-
-    //         // booking routes
-    //         Route::get('/mds/manager', 'index')->name('mds.manager');
-    //         Route::get('/mds/manager/booking', 'index')->name('mds.manager.booking');
-    //         Route::get('/mds/manager/booking/list', 'list')->name('mds.manager.booking.list');
-    //         Route::get('/mds/manager/booking/schedule/{id}', 'listEvent')->name('mds.manager.booking.schedule'); // for calendar
-    //         Route::get('/mds/manager/booking/create', 'create')->name('mds.manager.booking.create');
-    //         Route::get('/mds/manager/booking/manage/{id}', 'manage')->name('mds.manager.booking.manage');
-    //         Route::get('/mds/manager/booking/get/{id}', 'get')->name('mds.manager.booking.get');
-    //         Route::get('/mds/manager/booking/get_times/{date}/{venue_id}', 'get_times')->name('mds.manager.booking.get_times');
-    //         Route::get('/mds/manager/booking/times/cal/{date}/{venue_id}', 'get_times_cal')->name('mds.manager.booking.times.cal');
-    //         Route::post('mds/manager/booking/update', 'update')->name('mds.manager.booking.update');
-    //         Route::get('mds/manager/booking/edit/{id}', 'edit')->name('mds.manager.booking.edit');
-    //         Route::delete('/mds/manager/booking/delete/{id}', 'delete')->name('mds.manager.booking.delete');
-    //         Route::post('/mds/manager/booking/store', 'store')->name('mds.manager.booking.store');
-    //         Route::get('/mds/manager/booking/mv/detail/{id}', 'detail')->name('mds.manager.mv.detail');
-    //         Route::get('/mds/manager/booking/pass/pdf/{id?}', 'passPdf')->name('mds.manager.booking.pass.pdf');
-
-    //         Route::get('/mds/manager/events/{id}/switch',  'switch')->name('mds.manager.booking.switch');
-
-    //         Route::get('/mds/manager/dashboard', 'dashboard')->name('mds.manager.dashboard');
-
-
-    //         Route::get('/mds/manager/booking/confirmation', function () {
-    //             return view('/mds/manager/booking/confirmation');
-    //         })->name('mds.manager.booking.confirmation');
-
-
-    //         //Booking note
-    //         Route::get('/mds/manager/booking/mv/notes/{id}', 'getNotesView')->name('mds.manager.booking.mv.notes');
-    //         Route::post('mds/manager/booking/note/store', 'noteStore')->name('mds.manager.booking.note.store');
-    //         Route::delete('mds/manager/booking/note/delete/{id}', 'deleteNote')->name('mds.manager.booking.note.delete');
-
-    //         //Booking file upload
-    //         Route::post('mds/manager/booking/file/store', 'fileStore')->name('mds.manager.booking.file.store');
-    //         Route::delete('mds/manager/booking/file/{id}/delete', 'fileDelete')->name('mds.manager.booking.file.delete');
-    //     });
-
-    //     Route::controller(ManagerUserController::class)->group(function () {
-    //         Route::get('/mds/manager/users/profile', 'profile')->name('mds.manager.users.profile');
-    //     });
-    // });
 });
 
 
@@ -315,40 +255,23 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
         })->name('b');
         /*************************************** End Play ground */
 
-        Route::get('/mds/admin/booking/pick', function () {
-            return view('/mds/admin/booking/pick');
-        })
-            ->name('mds.admin.booking.pick')
-            ->middleware('role:SuperAdmin');
-        Route::post('/mds/admin/events/switch', [AdminBookingController::class, 'pickEvent'])
-            ->name('mds.admin.booking.event.switch')
-            ->middleware('role:SuperAdmin');
+                Route::get('/bbs/admin/booking/pick', function () {
+            return view('/bbs/admin/booking/pick');
+        })->name('bbs.admin.booking.pick')->middleware('role:SuperAdmin');
+        Route::post('/bbs/admin/events/switch', [AdminBookingController::class, 'pickEvent'])->name('bbs.admin.booking.event.switch')->middleware('role:SuperAdmin');
+
+
 
         Route::get('/bbs/customer/booking/pick', function () {
             return view('/bbs/customer/booking/pick');
         })->name('bbs.customer.booking.pick')->middleware('role:Customer');
         Route::post('/bbs/customer/events/switch', [CustomerBookingController::class, 'pickEvent'])->name('bbs.customer.booking.event.switch')->middleware('role:Customer');
 
+
         Route::get('/bbs/logout', [AuthAdminController::class, 'logout'])->name('bbs.logout');
-
-        // Route::get('/bbs/admin/booking/confirmation', function () {
-        //     return view('/bbs/admin/booking/confirmation');
-        // })->name('bbs.admin.booking.confirmation');
-
-        // Route::get('/mds/booking/pass/pdf/{id}', [BookingController::class, 'passPdf'])->name('mds.booking.pass.pdf');
 
 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        // Route::get('/mds/users/profile', [UserController::class, 'profile'])->name('mds.users.profile');
-
-
-        //Status
-        Route::get('/mds/setup/status/manage', [StatusController::class, 'index'])->name('mds.setup.status.manage');
-        Route::get('/mds/setup/status/list', [StatusController::class, 'list'])->name('mds.setup.status.list');
-        Route::get('/mds/setup/status/{id}/get', [StatusController::class, 'get'])->name('mds.setup.status.get');
-        Route::post('mds/setup/status/update', [StatusController::class, 'update'])->name('mds.setup.status.update');
-        Route::delete('/mds/setup/status/{id}/delete', [StatusController::class, 'delete'])->name('mds.setup.status.delete');
-        Route::post('/mds/setup/status/store', [StatusController::class, 'store'])->name('mds.setup.status.store');
 
         // Charts
         Route::get('/charts/piechart', [ChartsController::class, 'pieChart'])->name('charts.pie');
@@ -390,35 +313,6 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
         Route::post('forget-password', [AuthAdminController::class, 'submitForgetPasswordForm'])->name('forgot.password.post');
         Route::get('/auth/reset/{token}', [AuthAdminController::class, 'showResetPasswordForm'])->name('reset.password.get');
         Route::post('reset-password', [AuthAdminController::class, 'submitResetPasswordForm'])->name('reset.password.post');
-
-
-        // Route::get('/send-mail/nb', [SendMailController::class, 'newBookingEmail']);
-        // Route::get('/send-mail', [SendMailController::class, 'index']);
-        // Route::get('/send-mail2', [SendMailController::class, 'sendTaskAssignmentEmail']);
-
-        // Route::get('mail', function () {
-        //     // $order = App\Order::find(1);
-        //     $user = App\Models\User::find(41);
-        //     $details = [
-        //         'subject' => 'Tracki Notification Center. New task assignment',
-        //         'greeting' => 'Hi Raafat,',
-        //         'body' => 'task ABC has been assigned to you and ready for some action. chop chop start churning',
-        //         'startdate' => 'Start Date: 1/1/2025',
-        //         'duedate' => 'Due by: 1/1/2025',
-        //         'description' => 'Describe me',
-        //         'actiontext' => 'Go to Tracki',
-        //         'actionurl' => '/',
-        //         'lastline' => 'Please check the task online for any notes or attachments',
-        //     ];
-        //     // return (new App\Notifications\AnnouncementCenter($details))
-        //     //             ->toMail($user);
-        //     return (new App\Notifications\NewUserNotification($user))
-        //         ->toMail($user);
-        // });
-
-
-        // Route::get('/send', [SendMailController::class, 'sendTaskAssignmentNotifcation']);
-        // Route::get('/whatsapp', [CommunicationChannels::class, 'sendWhatsapp'])->name('whatsapp.send');
     });
 
     // HR Security Settings all routes

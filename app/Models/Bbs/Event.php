@@ -22,4 +22,14 @@ class Event extends Model
     {
         return $this->belongsToMany(Venue::class, 'venue_event', 'venue_id', 'event_id');
     }
+
+    public function matches()
+    {
+        return $this->hasMany(Matches::class, 'event_id');
+    }
+
+    public function services()
+    {
+        return $this->hasMany(BroadcastService::class, 'event_id');
+    }
 }

@@ -86,5 +86,5 @@
 @endsection
 
 @push('script')
-    <script src="{{ asset('assets/js/pages/vapp/parking_variation.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/bbs/admin/booking.js') }}"></script>
 @endpush

@@ -45,13 +45,12 @@
             <div class="col-sm-6 col-md-4 col-lg-3 pull-up">
                 <div class="swiper-slide">
 
-                    <div class="card overflow-hidden h-100 shadow-sm border-0 rounded-4" >
+                    <div class="card overflow-hidden h-100 shadow-sm border-0 rounded-4 service-card">
                         <div class="card-body text-center p-4">
                             <div class="d-flex justify-content-between align-items-start mb-2" style="height: 70px">
                                 <h5 class="fw-bold mb-0 text-start">{{ $service->title }}</h5>
-                                <span
-                                    class="badge bg-{{ $badge_bg_color }} rounded-pill px-3 py-2">{{ $service->available_slots }}
-                                    available</span>
+                                <div id="available_slots">
+                                </div>
                             </div>
 
                             <hr class="my-3">
@@ -59,11 +58,12 @@
                             <div class="text-start mb-5">
                                 <form action="{{ route('customer.booking.cart.store') }}" method="POST" id="cart-form">
                                     @csrf
-                                    <input type="hidden" name="service_id" value="{{ $service->id }}">
+                                    <input type="hidden" name="service_id" id="service_id" value="{{ $service->id }}">
                                     <input type="hidden" name="unit_price" value="{{ $service->unit_price }}">
 
                                     <div class="mb-3">
-                                        <select class="form-select" name="venue_id" required {{ $disabled }}>
+                                        <select class="form-select" name="venue_id" id="select_venue_id" required
+                                            {{ $disabled }}>
                                             <option value="" selected disabled>Select Venue</option>
                                             @foreach ($venues as $venue)
                                                 <option value="{{ $venue->id }}">{{ $venue->title }}</option>
@@ -72,7 +72,8 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <select class="form-select" name="match_id" required {{ $disabled }}>
+                                        <select class="form-select" name="match_id" id="select_match_id" required
+                                            {{ $disabled }}>
                                             <option value="" selected disabled>Select Match</option>
                                             @foreach ($matches as $match)
                                                 <option value="{{ $match->id }}">{{ $match->match_code }}</option>
@@ -83,7 +84,7 @@
                                     <div class="d-flex justify-content-between align-items-end">
                                         <div class="d-flex flex-between-center">
                                             <input class="form-control text-center input-spin-none " style="width:50px;"
-                                                type="number" name="quantity" min="1" value="1"
+                                                type="number" name="quantity" min="1" value="1" id="quantity"
                                                 max="{{ $service->available_slots }}" {{ $disabled }}>
                                             <button class="btn btn-phoenix-success border-0 ms-3"
                                                 {{ $disabled }}>Reserve
@@ -133,7 +134,7 @@
 
 @push('script')
     <script src="{{ asset('assets/js/pages/bbs/customer/booking.js') }}"></script>
-    <script src="{{ asset('assets/js/pages/bbs/customer/details.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/pages/bbs/customer/details.js') }}"></script> --}}
 
     <script>
         function incrementCount(btn) {

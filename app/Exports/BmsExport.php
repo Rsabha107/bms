@@ -16,6 +16,8 @@ class BmsExport implements FromCollection, WithHeadings
     {
         return [
             'REF_NUMBER',
+            'ORGANIZATION_NAME',
+            'BROADCASTER',
             'EVENT',
             'VENUE',
             'MATCH',
@@ -31,6 +33,8 @@ class BmsExport implements FromCollection, WithHeadings
             return [
                 // 'id' => $op->id,
                 'ref_number' => $op->ref_number,
+                'organization_name' => $op->created_by_user?->organization_name,
+                'created_by' => $op->created_by_user?->name,
                 'event' => $op->event->name,
                 'venue' => $op->venue->title,
                 'match' => $op->match->match_code,

@@ -11,9 +11,11 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\Sanctum;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        Event::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event) {
+            // $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);
+            $event->extendSocialite('microsoft', \SocialiteProviders\Microsoft\Provider::class);
+        });
+
         //
         // if (Schema::hasTable('settings')) {
         //     $settings = Setting::all()->pluck('value', 'key')->toArray();

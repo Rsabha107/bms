@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Bbs\BroadcastBooking;
 use App\Models\Bbs\BroadcastService;
 use App\Models\Bbs\Event;
+use App\Models\Bbs\MatchServiceAvailability;
 use App\Models\Bbs\MenuItem;
+use App\Models\Bbs\Venue;
 use App\Models\Mds\DriverStatus;
 use App\Models\Mds\MdsDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -26,7 +29,8 @@ class ServiceController extends Controller
     {
         Log::info('ServiceController@index');
         $broadcast_services = BroadcastService::all();
-        $menus = MenuItem::whereNotNull('parent_id')->with('children')->orderBy('order_number')->get();
+        $menus = MenuItem::all();
+        // $menus = MenuItem::whereNotNull('parent_id')->with('children')->orderBy('order_number')->get();
         return view('bbs.setting.service.list', compact('broadcast_services', 'menus'));
     }
 
@@ -86,7 +90,7 @@ class ServiceController extends Controller
                 session()->put('EVENT_ID', $id);
                 Log::info('Event ID: ' . session()->get('EVENT_ID'));
 
-                return redirect()->route('bbs.customer.booking')->with('message', 'Event switched.');
+                return redirect()->route('bbs.admin.booking')->with('message', 'Event switched.');
             } else {
                 return back()->with('error', 'Event not found.');
             }
@@ -279,6 +283,8 @@ class ServiceController extends Controller
         // dd($request);
         $user_id = Auth::user()->id;
         $op = new BroadcastService();
+        $event = Event::find(session()->get('EVENT_ID'));
+        $venue = Venue::all();
 
         $rules = [
             'title' => ['required'],
@@ -293,7 +299,10 @@ class ServiceController extends Controller
             $error = true;
             $message = implode($validator->errors()->all('<div>:message</div>'));  // use this for json/jquery
             return response()->json(['error' => $error, 'message' => $message]);
-        } else {
+        }
+
+        DB::beginTransaction();
+        try {
 
             // if ($request->hasFile('file_name')) {
 
@@ -336,6 +345,7 @@ class ServiceController extends Controller
             $message = 'Service created succesfully.' . $op->id;
 
             $op->title = $request->title;
+            $op->event_id = session()->get('EVENT_ID');
             $op->menu_item_id = $request->menu_item_id;
             $op->short_description = $request->short_description;
             $op->long_description = $request->long_description;
@@ -346,14 +356,30 @@ class ServiceController extends Controller
             $op->updated_by = $user_id;
 
             $op->save();
+
+            foreach ($event->matches as $match) {
+                foreach ($event->services as $service) {
+                    MatchServiceAvailability::firstOrCreate([
+                        'match_id' => $match->id,
+                        'service_id' => $service->id,
+                    ], [
+                        'max_slots' => $service->max_slots,
+                        'available_slots' => $service->slots_per_match,
+                        'used_slots' => 0,
+                        'group_key' => $service->group_key,
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return response()->json(['error' => $error, 'message' => $message]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating service: ' . $e->getMessage());
+            $error = true;
+            $message = 'An error occurred while creating the service.';
+            return response()->json(['error' => $error, 'message' => $message]);
         }
-
-        $notification = array(
-            'message'       => 'Service created successfully',
-            'alert-type'    => 'success'
-        );
-
-        return response()->json(['error' => $error, 'message' => $message]);
     }
 
     public function update(Request $request)

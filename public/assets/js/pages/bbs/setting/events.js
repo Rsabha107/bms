@@ -1,10 +1,51 @@
 $(document).ready(function () {
+
+        $(".js-select-event-assign-multiple-venue_id").select2({
+        closeOnSelect: false,
+        placeholder: "Select ...",
+    });
+
+    $(".js-select-event-assign-multiple-edit_venue_id").select2({
+        closeOnSelect: false,
+        placeholder: "Select ...",
+    });
     // console.log("all tasksJS file");
 
     // ************************************************** task venues
 
+    // $("body").on("click", "#editEvents", function () {
+    //     // console.log('inside edit_events')
+    //     var id = $(this).data("id");
+    //     var table = $(this).data("table");
+    //     // console.log('edit venues in venues.js');
+    //     // console.log('id: '+id);
+    //     // console.log('table: '+table);
+    //     // var target = document.getElementById("edit_venues_modal");
+    //     // var spinner = new Spinner().spin(target);
+    //     // $("#edit_venues_modal").modal("show");
+    //     $.ajax({
+    //         url: "/bbs/setting/event/mv/get/" + id,
+    //         type: "get",
+    //         headers: {
+    //             "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"), // Replace with your method of getting the CSRF token
+    //         },
+    //         dataType: "json",
+    //         success: function (response) {
+    //             // console.log(response)
+    //             g_response = response.view;
+    //             $("#global-edit-event-slot-content")
+    //                 .empty("")
+    //                 .append(g_response);
+    //             $("#edit_event_table").val(table);
+    //             // $("#edit_event_modal").modal("show");
+    //         },
+    //     }).done(function () {
+    //         $("#edit_event_modal").modal("show");
+    //     });
+    // });
+
     $("body").on("click", "#editEvents", function () {
-        // console.log('inside edit_events')
+        console.log("inside edit_events");
         var id = $(this).data("id");
         var table = $(this).data("table");
         // console.log('edit venues in venues.js');
@@ -12,20 +53,24 @@ $(document).ready(function () {
         // console.log('table: '+table);
         // var target = document.getElementById("edit_venues_modal");
         // var spinner = new Spinner().spin(target);
-        // $("#edit_venues_modal").modal("show");
+        // $("#edit_event_table").modal("show");
         $.ajax({
-            url: "/bbs/setting/event/mv/get/" + id,
+            url: "/bbs/setting/event/get/" + id,
             type: "get",
             headers: {
                 "X-CSRF-TOKEN": $('input[name="_token"]').attr("value"), // Replace with your method of getting the CSRF token
             },
             dataType: "json",
             success: function (response) {
-                // console.log(response)
-                g_response = response.view;
-                $("#global-edit-event-slot-content")
-                    .empty("")
-                    .append(g_response);
+                console.log(response);
+                var eventVenues = response.venues.map((venue) => venue.id);
+                console.log(eventVenues);
+
+                $("#edit_event_id").val(response.op.id);
+                $("#edit_event_name").val(response.op.name);
+                $("#edit_venue_id").val(eventVenues);
+                $("#edit_venue_id").trigger("change");
+                $("#editActiveFlag").val(response.op.active_flag);
                 $("#edit_event_table").val(table);
                 // $("#edit_event_modal").modal("show");
             },
@@ -102,4 +147,3 @@ window.icons = {
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>';
 }
-

@@ -143,25 +143,29 @@ if (!function_exists('get_settings')) {
     // }
 }
 
-if (!function_exists('get_project_progress')) {
-
-    function get_project_progress($id)
+if (!function_exists('generateSecurePassword')) {
+    function generateSecurePassword($length = 12)
     {
-        $project = Event::findOrFail($id);
+        $lowercase    = 'abcdefghijklmnopqrstuvwxyz';
+        $uppercase    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $numbers      = '0123456789';
+        $specialChars = '!@#$%^&*()-_=+<>?';
 
-        $progress_value = 0;
-        $task_count = $project->tasks->count();
-        $task_progress_sum = $project->tasks->sum('progress');
+        // Ensure at least one of each
+        $password = '';
+        $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
+        $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
+        $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        $password .= $specialChars[random_int(0, strlen($specialChars) - 1)];
 
-        if ($task_count) {
-            $progress_value = round(($task_progress_sum / $task_count), 2);
+        // Fill the rest
+        $all = $lowercase . $uppercase . $numbers . $specialChars;
+        for ($i = strlen($password); $i < $length; $i++) {
+            $password .= $all[random_int(0, strlen($all) - 1)];
         }
 
-        // Log::info('Helper::appHelper $task_count: '.$task_count);
-        // Log::info('Helper::appHelper $task_progress_sum: '.$task_progress_sum);
-        // Log::info('Helper::appHelper $progress_value: '.$progress_value);
-
-        return $progress_value;
+        // Shuffle to randomize order
+        return str_shuffle($password);
     }
 }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Mds\Setting;
+namespace App\Http\Controllers\Bbs\Setting;
 
 use App\Http\Controllers\Controller;
 use App\Models\GeneralSettings\Setting;

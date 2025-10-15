@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\UsersDataTable;
+use App\Mail\AccessGrantedMail;
 use App\Models\Department;
 use App\Models\Event;
 use App\Models\GeneralSettings\GlobalAttachment;
@@ -12,8 +13,10 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\Finder\Glob;
@@ -37,12 +40,13 @@ class UserController extends Controller
     {
         $user = User::find(Auth::user()->id);
         $file = $user->file_attach;
-    
+
         return view('mds/users/profile', compact('user', 'file'));
     }
 
 
-    public function details($id){
+    public function details($id)
+    {
 
         $workspace_id = session()->get('workspace_id');
 
@@ -71,7 +75,7 @@ class UserController extends Controller
 
         // dd($task_count);
 
-        return view('tracki.users.details', compact('user','projects','statuses','departments', 'tasks', 'projectCount', 'users', 'todos','project_count'));
+        return view('tracki.users.details', compact('user', 'projects', 'statuses', 'departments', 'tasks', 'projectCount', 'users', 'todos', 'project_count'));
     }
 
     public function store(Request $request)
@@ -122,6 +126,5 @@ class UserController extends Controller
         // return redirect()->back()->with($notification);
         return Redirect::route('mds.auth.signup')->with($notification);
         //mainProfileStore
-
     }
 }

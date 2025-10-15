@@ -21,8 +21,9 @@ class CheckEventSelection
             // Log::info('CheckEventSelection: Checking event selection: '. session()->has('EVENT_ID'));
             if (!session()->has('EVENT_ID') && auth()->check()) {
                 if (auth()->user()->hasRole('SuperAdmin')) {
-                    session()->put('EVENT_ID', 11);
-                    return redirect()->route('bbs.admin.booking');
+                    // session()->put('EVENT_ID', 11);
+                    // return redirect()->route('bbs.admin.booking');
+                    return redirect()->route('bbs.admin.booking.pick');
                 } else {
                     return redirect()->route('bbs.customer.booking.pick');
                 }
