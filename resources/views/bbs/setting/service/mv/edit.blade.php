@@ -1,8 +1,8 @@
 @php
     $menus = App\Models\Bbs\MenuItem::with('children')
-    ->orderBy('order_number', 'asc')
-    ->orderBy('parent_id', 'asc')
-    ->get();
+        ->orderBy('order_number', 'asc')
+        ->orderBy('parent_id', 'asc')
+        ->get();
 @endphp
 
 <script src="{{ asset('fnx/assets/js/phoenix.js') }}"></script>
@@ -31,18 +31,20 @@
                 <div class="mb-3 text-start">
                     <input type="file" name="file_name" class="dropify" data-height="200"
                         data-default-file="{{ !empty($service->image) ? asset('storage/upload/service/images/' . $service->image) : url('storage/upload/default.png') }}" />
-                    <!-- data-default-file="{{ !empty($service->image) ? route('bbs.setting.service.file', $service->image) : url('storage/upload/default.png') }}" /> -->
-                </div>
-            </div> --}}
+            <!-- data-default-file="{{ !empty($service->image) ? route('bbs.setting.service.file', $service->image) : url('storage/upload/default.png') }}" /> -->
+        </div>
+    </div> --}}
 
             <div class="row mb-3">
                 <div class="col-sm-6 col-md-12">
                     <label class="form-label" for="add_menu_item_id">Menu Item</label>
-                    <select class="form-select" id="add_menu_item_id" name="menu_item_id" data-with="100%"
+                    <select class="form-select" id="add_menu_item_id" name="menu_item_id" data-with="100%" required
                         data-placeholder="Select menu...">
                         <option value="" selected>Select Menu Item</option>
                         @foreach ($menus as $menu)
-                            <option value="{{ $menu->id }}">{{ $menu->title }}</option>
+                            <option value="{{ $menu->id }}"
+                                {{ $menu->id == $service->menu_item_id ? 'selected' : '' }}>
+                                {{ $menu->title }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -65,15 +67,25 @@
             </div>
 
             <div class="row mb-3">
-                <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1" inputValue="{{ $service->max_slots }}"
-                    name="max_slots" elementId="add_max_slots" inputType="number" inputAttributes="" label="Max Slots"
+                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1"
+                    inputValue="{{ $service->slots_per_match }}" name="slots_per_match" elementId="edit_slots_per_match"
+                    inputType="number" inputAttributes="" label="Slots Per Match" required="required" disabled="0" />
+                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1"
+                    inputValue="{{ $service->reservation_limit }}" name="reservation_limit"
+                    elementId="edit_reservation_limit" inputType="number" inputAttributes="" label="Reservation Limit"
                     required="required" disabled="0" />
-                <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1"
-                    inputValue="{{ $service->available_slots }}" name="available_slots" elementId="add_available_slots"
-                    inputType="number" inputAttributes="" label="Available Slots" required="required" disabled="0" />
-                <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1"
-                    inputValue="{{ $service->used_slots }}" name="used_slots" elementId="add_used_slots"
-                    inputType="number" label="Used Slots" inputAttributes="" required="required" disabled="0" />
+                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1"
+                    inputValue="{{ $service->group_key }}" name="group_key" elementId="edit_group_key"
+                    inputType="text" inputAttributes="" label="Group Key" required="" disabled="0" />
+                {{-- <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1" inputValue="{{ $service->max_slots }}"
+            name="max_slots" elementId="add_max_slots" inputType="number" inputAttributes="" label="Max Slots"
+            required="required" disabled="0" />
+        <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1"
+            inputValue="{{ $service->available_slots }}" name="available_slots" elementId="add_available_slots"
+            inputType="number" inputAttributes="" label="Available Slots" required="required" disabled="0" />
+        <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1"
+            inputValue="{{ $service->used_slots }}" name="used_slots" elementId="add_used_slots"
+            inputType="number" label="Used Slots" inputAttributes="" required="required" disabled="0" /> --}}
             </div>
 
             <div class="col-12 gy-3">

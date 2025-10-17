@@ -22,6 +22,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Bbs\Admin\ImportExportController;
 use App\Http\Controllers\Bbs\Setting\VariationController;
 use App\Http\Controllers\Bbs\Customer\UserController;
+use App\Http\Controllers\Bbs\Setting\MatchServiceAvailabilityController;
 use App\Http\Controllers\UtilController;
 
 /*
@@ -135,22 +136,23 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::get('/bbs/setting/service', 'index')->name('bbs.setting.service');
             Route::get('/bbs/setting/service/list', 'list')->name('bbs.setting.service.list');
             Route::get('/bbs/setting/service/get/{id}', 'get')->name('bbs.setting.service.get');
-            Route::get('/bbs/setting/service/create', 'create')->name('bbs.setting.service.create');
-            // Route::post('bbs/setting/service/update', 'update')->name('bbs.setting.service.update');
+            // Route::get('/bbs/setting/service/create', 'create')->name('bbs.setting.service.create');
+            Route::post('bbs/setting/service/update', 'update')->name('bbs.setting.service.update');
             Route::delete('/bbs/setting/service/delete/{id}',  'delete')->name('bbs.setting.service.delete');
-            // Route::post('/bbs/setting/service/store', 'store')->name('bbs.setting.service.store');
-            Route::post('bbs/service/status/update', 'updateStatus')->name('bbs.service.status.update');
-            Route::get('bbs/service/status/edit/{id}', 'editStatus')->name('bbs.service.status.edit');
+            Route::post('/bbs/setting/service/store', 'store')->name('bbs.setting.service.store');
             Route::get('/bbs/setting/service/mv/get/{id}', 'getView')->name('bbs.setting.service.get.mv');
             Route::get('bbs/admin/booking/{id}/switch', 'switch')->name('bbs.admin.booking.switch');
+        });
 
-            // Route::get('/bbs/manager', 'index')->name('bbs.manager');
-            // Route::get('/bbs/manager/booking/cart', 'cart')->name('bbs.manager.booking.cart');
-            // Route::get('/bbs/manager/booking/list', 'adminList')->name('bbs.manager.booking.list');
-            // Route::get('/bbs/manager/booking/detail/{id}', 'detail')->name('bbs.manager.booking.detail');
-            // Route::delete('/bbs/manager/booking/delete/{id}',  'deleteBooking')->name('bbs.manager.booking.delete');
-            // Route::post('bbs/manager/booking/cart/store', 'storeService')->name('manager.booking.cart.store');
-            // Route::get('bbs/manager/orders/{id}/switch', 'switch')->name('bbs.manager.orders.switch');
+        Route::controller(MatchServiceAvailabilityController::class)->group(function () {
+            Route::get('/bbs/match/service/availability', 'index')->name('bbs.match.service.availability');
+            Route::get('/bbs/match/service/availability/list', 'list')->name('bbs.match.service.availability.list');
+            Route::get('/bbs/match/service/availability/get/{id}', 'get')->name('bbs.match.service.availability.get');
+            Route::delete('/bbs/match/service/availability/delete/{id}',  'delete')->name('bbs.match.service.availability.delete');
+            Route::post('bbs/match/service/availability/update', 'update')->name('bbs.match.service.availability.update');
+            Route::post('/bbs/match/service/availability/store', 'store')->name('bbs.match.service.availability.store');
+
+            Route::get('/bbs/match/service/availability/mv/get/{id}', 'getView')->name('bbs.match.service.availability.get.mv');
         });
 
         // Venue
@@ -255,12 +257,10 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
         })->name('b');
         /*************************************** End Play ground */
 
-                Route::get('/bbs/admin/booking/pick', function () {
+        Route::get('/bbs/admin/booking/pick', function () {
             return view('/bbs/admin/booking/pick');
         })->name('bbs.admin.booking.pick')->middleware('role:SuperAdmin');
         Route::post('/bbs/admin/events/switch', [AdminBookingController::class, 'pickEvent'])->name('bbs.admin.booking.event.switch')->middleware('role:SuperAdmin');
-
-
 
         Route::get('/bbs/customer/booking/pick', function () {
             return view('/bbs/customer/booking/pick');

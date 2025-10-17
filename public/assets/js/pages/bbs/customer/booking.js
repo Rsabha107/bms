@@ -136,7 +136,7 @@ $("body").on("change", "#select_match_id", function (e) {
                 "</span>";
             quantity_input.attr(
                 "max",
-                response.service[0].available_slots
+                response.service[0].reservation_limit
             );
             available_slots_div.html(available_slots);
             const badge = available_slots_div.find(".bounce-badge");

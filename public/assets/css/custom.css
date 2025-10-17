@@ -20,21 +20,9 @@
     text-decoration: none;
 }
 
-.count-input {
-    display: inline-flex;
-    overflow: hidden;
-    background-color: #fff;
-    border: 1px solid #cad0d9;
-    border-radius: 0.5rem;
-    transform: translateZ(0);
-}
-
-a {
-    color: #fd7e14; /* Change link color */
-}
-
-a:hover {
-    color: #ffc107; /* On hover */
+.custom-modal-width {
+    max-width: 90%; /* or any specific width */
+    width: 100%;
 }
 
 @-webkit-keyframes spin {
@@ -111,8 +99,11 @@ a:hover {
 
 .bg-modal-header {
     vertical-align: bottom;
-    background-color: rgb(159, 166, 178);
-    color: #0e0d0d;
+    background-color: rgb(65, 74, 179, 1);
+    /* background-color: rgb(84, 53, 182); */
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
 }
 
 img.zoom {
@@ -243,6 +234,14 @@ img.zoom {
     width: 300px !important;
 }
 
+a {
+    color: #fd7e14; /* Change link color */
+}
+
+a:hover {
+    color: #ffc107; /* On hover */
+}
+
 @media (max-width: 768px) {
     #global-search + .select2-container--default .select2-selection--single {
         width: 100px !important;
@@ -317,7 +316,21 @@ max-height: 660px;
     height: 100vh;
 }
 
-.offcanvas-global-modal.in {
+.offcanvas-global-modal.in95 {
+    transition: all 0.5s ease;
+    width: 95%;
+    right: 0px;
+
+    /* @include media-breakpoint-down(sm){
+  width: 100%;
+
+  .w-25 {
+      width: 40% !important;
+  }
+} */
+}
+
+.offcanvas-global-modal.in65 {
     transition: all 0.5s ease;
     width: 65%;
     right: 0px;
@@ -330,6 +343,28 @@ max-height: 660px;
   }
 } */
 }
+
+.small-col {
+    width: 80px;
+}
+.medium-col {
+    width: 150px;
+}
+.wide-col {
+    width: 300px;
+}
+
+/* .button-link {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #3490dc;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.button-link:hover {
+  background-color: #2779bd;
+} */
 
 .close-task-detail {
     position: absolute;
@@ -508,21 +543,6 @@ div#stages {
     }
 }
 
-.longtext {
-    height: 18px;
-    width: 140px;
-    padding: 0;
-    overflow: hidden;
-    /* position: relative; */
-    display: inline-block;
-    margin: 0 5px 0 5px;
-    text-align: center;
-    text-decoration: none;
-    text-overflow: ellipsis;
-    white-space: wrap;
-    color: #000;
-}
-
 #loading {
     left: 50%;
     position: absolute;
@@ -592,29 +612,88 @@ div#stages {
     max-height: 300px;
 }
 
-.bfooter {
-    margin-top: auto;
+.loading-overlay {
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
-    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* for bounce effect on badge */
-@keyframes bounceIn {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
+.spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 5px solid #3498db;
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.booking-request-card-title {
+    display: inline-block;
+    max-width: 200px;       /* adjust to your input box width */
+    padding: 4px 8px;
+    background-color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    overflow: hidden;       /* hide overflow */
+    /* text-overflow: ellipsis;add ... if text too long */
+    white-space: normal;    /* keep in one line */
+}
+
+@media (max-width: 600px) {
+  .booking-request-card-title::before {
+    content: "";
+    display: block;
   }
 }
 
-.bounce {
-  animation: bounceIn 0.6s ease;
+/* Transparent offcanvas */
+.custom-offcanvas {
+  background: rgba(245, 240, 240, 0.6) !important; /* semi-transparent black */
+  backdrop-filter: blur(5px); /* optional blur effect for glassy look */
+  color: white;
 }
+
+/* Backdrop opacity */
+.offcanvas-backdrop {
+  background-color: rgba(0, 0, 0, 0.6) !important; /* darker backdrop */
+}
+
+/* end of blinking dot effect */
+/* custom purple button */
+
+.btn-purple {
+    background-color: rgb(138, 26, 155);
+    border-color: rgb(138, 26, 155);
+}
+
+.btn-purple:hover {
+    background-color: rgb(115, 20, 130); /* darker shade for hover */
+    border-color: rgb(115, 20, 130);
+}
+.btn-purple:focus,
+.btn-purple:active {
+    background-color: rgb(115, 20, 130); /* darker shade for focus/active */
+    border-color: rgb(115, 20, 130);
+    box-shadow: 0 0 0 0.2rem rgba(115, 20, 130, 0.5); /* focus ring */
+}
+.btn-purple:disabled {
+    background-color: rgb(200, 150, 200); /* lighter shade for disabled */
+    border-color: rgb(200, 150, 200);
+    cursor: not-allowed;
+    opacity: 0.65;
+}   
+/* end of custom purple button */

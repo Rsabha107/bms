@@ -58,21 +58,21 @@ $(document).ready(function () {
 
     // alert('inside doc ready')
     $("#profile_image_name, #upload-avatar").change(function (e) {
-        console.log('inside profile_image_name')
+        console.log("inside profile_image_name");
         var reader = new FileReader();
-        reader.onload = function(e) {
-            $('#showImage').attr('src', e.target.result);
-        }
-        reader.readAsDataURL(e.target.files['0']);
+        reader.onload = function (e) {
+            $("#showImage").attr("src", e.target.result);
+        };
+        reader.readAsDataURL(e.target.files["0"]);
     });
 
-    $('#edit_profile_image_name').change(function(e) {
-        console.log('inside edit profile_image_name')
+    $("#edit_profile_image_name").change(function (e) {
+        console.log("inside edit profile_image_name");
         var reader = new FileReader();
-        reader.onload = function(e) {
-            $('#edit_showImage').attr('src', e.target.result);
-        }
-        reader.readAsDataURL(e.target.files['0']);
+        reader.onload = function (e) {
+            $("#edit_showImage").attr("src", e.target.result);
+        };
+        reader.readAsDataURL(e.target.files["0"]);
     });
 
     $(".form-submit-event-tiny").submit(function (event) {
@@ -102,6 +102,13 @@ $(document).ready(function () {
             console.log(pair[0] + ", " + pair[1]);
         }
 
+        //         if (tinymce.get('editor_id')) {
+        //     var content = tinymce.get('editor_id').getContent();
+        //     console.log("content", content);
+        //         formData.append("long_description", content);
+        // } else {
+        //     console.warn('Editor not initialized');
+        // }
         content = tinymce.activeEditor.getContent();
         console.log("content", content);
         formData.append("long_description", content);
@@ -123,7 +130,7 @@ $(document).ready(function () {
         console.log("*****************************************");
 
         if (!name.checkValidity()) {
-            console.log('validity check')
+            console.log("validity check");
             event.preventDefault();
             event.stopPropagation();
         } else {
@@ -155,7 +162,9 @@ $(document).ready(function () {
                         submit_btn.html(button_text);
                         submit_btn.attr("disabled", false);
                         var modalID = $(".modal.fade.show").attr("id");
-                        var ofcanvasID = $(".offcanvas.offcanvas-end.show").attr("id");
+                        var ofcanvasID = $(
+                            ".offcanvas.offcanvas-end.show"
+                        ).attr("id");
                         $("#" + modalID).modal("hide");
                         $("#" + ofcanvasID).offcanvas("hide");
                         // console.log("before form reset");
@@ -242,7 +251,7 @@ $(document).ready(function () {
         console.log("*****************************************");
 
         if (!name.checkValidity()) {
-            console.log('validity check')
+            console.log("validity check");
             event.preventDefault();
             event.stopPropagation();
         } else {
@@ -274,7 +283,9 @@ $(document).ready(function () {
                         submit_btn.html(button_text);
                         submit_btn.attr("disabled", false);
                         var modalID = $(".modal.fade.show").attr("id");
-                        var ofcanvasID = $(".offcanvas.offcanvas-end.show").attr("id");
+                        var ofcanvasID = $(
+                            ".offcanvas.offcanvas-end.show"
+                        ).attr("id");
                         $("#" + modalID).modal("hide");
                         $("#" + ofcanvasID).offcanvas("hide");
                         // console.log("before form reset");
@@ -402,9 +413,7 @@ function getNameItials(value) {
 
 (function (factory) {
     typeof define === "function" && define.amd ? define(factory) : factory();
-})
-
-(function () {
+})(function () {
     "use strict";
 
     // import * as echarts from 'echarts';

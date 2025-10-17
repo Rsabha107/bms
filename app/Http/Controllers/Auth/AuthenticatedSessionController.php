@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Event;
 use App\Models\User;
 use App\Notifications\EmailOtpVerification;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -45,27 +46,27 @@ class AuthenticatedSessionController extends Controller
 
         Auth::logoutOtherDevices($request->password);
 
-        Log::info('AuthenticatedSessionController:store user: '.$user);
-        Log::info('settings.otp_enabled: '.config('settings.otp_enabled'));
+        Log::info('AuthenticatedSessionController:store user: ' . $user);
+        Log::info('settings.otp_enabled: ' . config('settings.otp_enabled'));
         if (config('settings.otp_enabled')) {
             // $this->showOtp();
             // $simpleOTP = new SimpleOTP();
             // $code = $simpleOTP->create(auth()->user()->email);
             $otp = SimplOtp::generate(auth()->user()->email);
-            if($otp->status === true){
+            if ($otp->status === true) {
                 $user->notify(new EmailOtpVerification($otp->token));
             }
             return view('auth/otp');
         }
 
-                // //set the default workspace as set during user creation
-                // session()->put('workspace_id', $request->user()->workspace_id);
-                // Log::info('AuthenticatedSessionController:store workspace_id: '.$request->user()->workspace_id);
+        // //set the default workspace as set during user creation
+        // session()->put('workspace_id', $request->user()->workspace_id);
+        // Log::info('AuthenticatedSessionController:store workspace_id: '.$request->user()->workspace_id);
 
         // Log::info($request->authenticate());
         // Log::info($request->user()->role);
         $url = '';
-        if (Auth::user()->hasRole('SuperAdmin')){
+        if (Auth::user()->hasRole('SuperAdmin')) {
             Log::info('AuthenticatedSessionController:store user role: admin');
             $url = 'bbs/admin/booking';
             return redirect()->intended($url);
@@ -87,14 +88,38 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      */
+    // public function destroy(Request $request): RedirectResponse
+    // {
+    //     Auth::guard('web')->logout();
+
+    //     $request->session()->invalidate();
+
+    //     $request->session()->regenerateToken();
+
+    //     return redirect('/');
+    // }
+
     public function destroy(Request $request): RedirectResponse
     {
+        $provider = $request->user()->provider;
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        if ($provider === 'local') {
+            appLog('Local login - redirecting to login page');
+            session()->forget('login_method');
+            return redirect('/');
+        }
+
+        session()->forget('login_method');
+        $microsoftLogoutUrl = Socialite::driver('microsoft')->getLogoutUrl(route('login')); // Replace 'azure' with your Microsoft Socialite driver name if different, and 'login' with your desired redirect URI after Microsoft logout.
+        appLog('Redirecting to Microsoft logout URL: ' . $microsoftLogoutUrl);
+        return redirect($microsoftLogoutUrl);
+
+        // return redirect('/');
     }
 }

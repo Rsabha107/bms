@@ -92,18 +92,6 @@
                                         </div>
                                     </div>
                                 </form>
-                                {{-- <p class="mb-2">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            Assess the best strategy for entering the Indian market
-                        </p>
-                        <p class="mb-2">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            Based on your business goals, budget, and industry
-                        </p>
-                        <p class="mb-3">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            Get personalized recommendations for market entry
-                        </p> --}}
                             </div>
                             <a href="#" class="btn w-100 text-white fw-semibold rounded-3" data-bs-toggle="modal"
                                 data-bs-target="#descModal{{ $service->id }}"

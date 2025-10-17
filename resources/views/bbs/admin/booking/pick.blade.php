@@ -39,15 +39,20 @@
                                 <option value="" selected>Select venue ..</option>
                                 @foreach ($venues as $venue)
                                 <option value="{{ $venue->id }}">{{ $venue->title }}
-                                </option>
-                                @endforeach
+                            </option>
+                            @endforeach
                             </select> --}}
                             <button class="btn btn-subtle-primary w-100 mb-3" type="submit">Choose
                                 Event</button>
                         </form>
                     </div>
                     <div class="d-flex justify-content-center mt-3">
-                        <a class="btn btn-sm btn btn-purple text-white" href="{{ route('bbs.logout') }}">Logout</a>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-purple text-white">
+                                Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

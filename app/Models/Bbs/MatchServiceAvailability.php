@@ -12,4 +12,13 @@ class MatchServiceAvailability extends Model
     protected $table="match_service_availabilities";
     protected $guarded = [];
 
+    public function match()
+    {
+        return $this->belongsTo(Matches::class, 'match_id', 'id');
+    }
+    public function service()
+    {
+        return $this->belongsTo(BroadcastService::class, 'service_id', 'id');
+    }
+
 }

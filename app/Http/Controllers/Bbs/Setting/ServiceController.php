@@ -125,44 +125,44 @@ class ServiceController extends Controller
         return response()->json(['op' => $op]);
     }
 
-    public function editStatus($id)
-    {
-        //  dd('editTaskProgress');
-        $data = MdsDriver::find($id);
-        //dd($data);
-        $data_arr = [];
+    // public function editStatus($id)
+    // {
+    //     //  dd('editTaskProgress');
+    //     $data = MdsDriver::find($id);
+    //     //dd($data);
+    //     $data_arr = [];
 
-        $data_arr[] = [
-            "id"        => $data->id,
-            "status_id"  => $data->status_id,
-        ];
+    //     $data_arr[] = [
+    //         "id"        => $data->id,
+    //         "status_id"  => $data->status_id,
+    //     ];
 
-        $response = ["retData"  => $data_arr];
-        return response()->json($response);
-    } // editStatus
+    //     $response = ["retData"  => $data_arr];
+    //     return response()->json($response);
+    // } // editStatus
 
-    public function updateStatus(Request $request)
-    {
+    // public function updateStatus(Request $request)
+    // {
 
-        $driver = MdsDriver::findOrFail($request->id);
-        $status_title = DriverStatus::findOrFail($request->status_id);
+    //     $driver = MdsDriver::findOrFail($request->id);
+    //     $status_title = DriverStatus::findOrFail($request->status_id);
 
-        Log::info($status_title->title);
-        $driver->update([
-            'status_id' => $request->status_id,
-        ]);
+    //     Log::info($status_title->title);
+    //     $driver->update([
+    //         'status_id' => $request->status_id,
+    //     ]);
 
-        $notification = array(
-            'message'       => 'Driver status updated successfully',
-            'alert-type'    => 'success'
-        );
+    //     $notification = array(
+    //         'message'       => 'Driver status updated successfully',
+    //         'alert-type'    => 'success'
+    //     );
 
-        return response()->json(['error' => false, 'message' => 'Driver Status updated successfully.', 'id' => $driver->id]);
+    //     return response()->json(['error' => false, 'message' => 'Driver Status updated successfully.', 'id' => $driver->id]);
 
-        // Toastr::success('Has been add successfully :)','Success');
-        // return redirect()->back()->with($notification);
-        // deleteEvent
-    } //updateStatus
+    //     // Toastr::success('Has been add successfully :)','Success');
+    //     // return redirect()->back()->with($notification);
+    //     // deleteEvent
+    // } //updateStatus
 
 
     public function list()
@@ -281,7 +281,7 @@ class ServiceController extends Controller
     {
         //
         // dd($request);
-        $user_id = Auth::user()->id;
+        $user = Auth::user();
         $op = new BroadcastService();
         $event = Event::find(session()->get('EVENT_ID'));
         $venue = Venue::all();
@@ -304,43 +304,6 @@ class ServiceController extends Controller
         DB::beginTransaction();
         try {
 
-            // if ($request->hasFile('file_name')) {
-
-            //     $file = $request->file('file_name');
-            //     $fileNameWithExt = $request->file('file_name')->getClientOriginalName();
-            //     // get file name
-            //     $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
-            //     // get extension
-            //     $extension = $request->file('file_name')->getClientOriginalExtension();
-
-            //     // $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-            //     $fileNameToStore = rand() . date('ymdHis') . $file->getClientOriginalName();  // use this
-
-            //     Log::info($fileNameWithExt);
-            //     Log::info($filename);
-            //     Log::info($extension);
-            //     Log::info($fileNameToStore);
-
-            //     $image = Image::read($file);
-            //     $image->resize(530, 530)->save('storage/upload/service/images/' . $fileNameToStore);
-
-            //     // $path = $request->file('file_name')->storeAs('private/mds/event/logo', $fileNameToStore);
-            //     // Storage::disk('private')->putFileAs('bbs/service/images', $file, $fileNameToStore);
-            //     // $path = $request->file('file_name')->storeAs('public/upload/service/images', $fileNameToStore);
-
-
-            //     // $path = $file->move('upload/profile_images/', $fileNameToStore);
-            //     // Log::info($path);
-
-
-            // } else {
-            //     $fileNameToStore = 'noimage.jpg';
-            //     $fileNameWithExt = 'noimage.jpg';
-            // }
-
-            // $op->image = $fileNameToStore;
-            // $op->original_image_name = $fileNameWithExt;
-
             $error = false;
             $message = 'Service created succesfully.' . $op->id;
 
@@ -349,11 +312,14 @@ class ServiceController extends Controller
             $op->menu_item_id = $request->menu_item_id;
             $op->short_description = $request->short_description;
             $op->long_description = $request->long_description;
-            $op->max_slots = $request->max_slots;
-            $op->available_slots = $request->available_slots;
+            $op->slots_per_match = $request->slots_per_match;
+            $op->reservation_limit = $request->reservation_limit;
+            $op->max_slots = $request->slots_per_match;
+            $op->available_slots = $request->slots_per_match;
+            $op->group_key = $request->group_key;
             $op->used_slots = $request->used_slots;
-            $op->created_by = $user_id;
-            $op->updated_by = $user_id;
+            $op->created_by = $user->id;
+            $op->updated_by = $user->id;
 
             $op->save();
 
@@ -363,10 +329,11 @@ class ServiceController extends Controller
                         'match_id' => $match->id,
                         'service_id' => $service->id,
                     ], [
-                        'max_slots' => $service->max_slots,
+                        'max_slots' => $service->slots_per_match,
                         'available_slots' => $service->slots_per_match,
                         'used_slots' => 0,
                         'group_key' => $service->group_key,
+                        'reservation_limit' => $service->reservation_limit,
                     ]);
                 }
             }
@@ -403,48 +370,8 @@ class ServiceController extends Controller
             return response()->json(['error' => $error, 'message' => $message]);
         } else {
 
-            $user_id = Auth::user()->id;
+            $user = Auth::user();
             $op = BroadcastService::find($request->id);
-
-            // if ($request->hasFile('file_name')) {
-
-            //     $file = $request->file('file_name');
-            //     $fileNameWithExt = $request->file('file_name')->getClientOriginalName();
-            //     // get file name
-            //     $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
-            //     // get extension
-            //     $extension = $request->file('file_name')->getClientOriginalExtension();
-
-            //     $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-            //     $fileNameToStore = rand() . date('ymdHis') . $file->getClientOriginalName();  // use this
-
-            //     Log::info($fileNameWithExt);
-            //     Log::info($filename);
-            //     Log::info($extension);
-            //     Log::info($fileNameToStore);
-
-            //     // upload
-            //     if ($op->event_logo != 'default.png') {
-            //         // Storage::delete('bbs/service/images/' . $op->image);
-            //         Storage::delete('public/upload/service/images/' . $op->image);
-            //     }
-
-            //     $image = Image::read($file);
-            //     $image->resize(530, 530)->save('storage/upload/service/images/' . $fileNameToStore);
-
-            //     // $path = $request->file('file_name')->storeAs('private/mds/event/logo', $fileNameToStore);
-            //     // Storage::disk('private')->putFileAs('bbs/service/images', $file, $fileNameToStore);
-            //     // $path = $request->file('file_name')->storeAs('public/upload/service/images', $fileNameToStore);
-
-
-            //     // $path = $file->move('upload/profile_images/', $fileNameToStore);
-            //     // Log::info($path);
-
-            //     $op->image = $fileNameToStore;
-            //     $op->original_image_name = $fileNameWithExt;
-            // } else {
-            //     $fileNameToStore = 'noimage.jpg';
-            // }
 
             $error = false;
             $message = 'Service updated succesfully.' . $op->id;
@@ -453,10 +380,13 @@ class ServiceController extends Controller
             $op->menu_item_id = $request->menu_item_id;
             $op->short_description = $request->short_description;
             $op->long_description = $request->long_description;
-            $op->max_slots = $request->max_slots;
-            $op->available_slots = $request->available_slots;
+            $op->slots_per_match = $request->slots_per_match;
+            $op->reservation_limit = $request->reservation_limit;
+            $op->max_slots = $request->slots_per_match;
+            $op->available_slots = $request->slots_per_match;
             $op->used_slots = $request->used_slots;
-            $op->updated_by = $user_id;
+            $op->group_key = $request->group_key;
+            $op->updated_by = $user->id;
 
             $op->save();
         }
@@ -524,7 +454,7 @@ class ServiceController extends Controller
 
         $file_path = 'app/private/bbs/service/images/';
 
-        $file_path = $file_path . $service->image;
+        $file_path = $file_path . $service?->image;
         $path = storage_path($file_path);
 
         // $url = Storage::disk('private')->temporaryUrl($path, now()->addMinutes(10));

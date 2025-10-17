@@ -1,4 +1,4 @@
-<div class="offcanvas offcanvas-end offcanvas-global-modal in65" id="offcanvas-edit-service-modal" tabindex="-1"
+<div class="offcanvas offcanvas-end offcanvas-global-modal in65" id="offcanvas-edit-match-service-availability-modal" tabindex="-1"
     aria-labelledby="offcanvasWithBackdropLabel">
     <a class="close-task-detail in" id="close-task-detail" style="display: block;" data-bs-dismiss="offcanvas">
         <span><svg class="svg-inline--fa fa-times fa-w-11" aria-hidden="true" focusable="false" data-prefix="fa"
@@ -12,25 +12,25 @@
     <div class="offcanvas-body">
         <div class="row">
             <div class="col-sm-12">
-                <form class="row g-3 needs-validation form-submit-event-tiny" id="edit_service_form" novalidate=""
-                    action="{{ route('bbs.setting.service.update') }}" method="POST">
+                <form class="row g-3 needs-validation form-submit-event" id="edit_service_form" novalidate=""
+                    action="{{ route('bbs.match.service.availability.update') }}" method="POST">
                     @csrf
-                    <div id="global-edit-service-content"></div>
+                    <div id="global-edit-match-service-availability-content"></div>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="offcanvas offcanvas-end offcanvas-global-modal in65" id="offcanvas-add-service-modal" tabindex="-1"
+<div class="offcanvas offcanvas-end offcanvas-global-modal in65" id="offcanvas-add-match-service-availability-modal" tabindex="-1"
     aria-labelledby="offcanvasWithBackdropLabel">
     <a class="close-task-detail in" id="close-task-detail" style="display: block;" data-bs-dismiss="offcanvas">
         <span>
             <i class="fa fa-times"></i>
         </span>
     </a>
-    <x-setting.admin-service-drawer id="" formAction="{{ route('bbs.setting.service.store') }}"
-        formId="add_service_form" :broadcast_services="$broadcast_services" :menus="$menus"
+    <x-setting.admin-service-availability-drawer id="" formAction="{{ route('bbs.match.service.availability.store') }}"
+        formId="add_service_form" :services="$broadcast_services" :matches="$matches"
         />
 </div>
 
