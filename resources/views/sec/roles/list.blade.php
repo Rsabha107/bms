@@ -290,6 +290,6 @@
         });
     </script>
 
-    @include('mds.partials.event-js')
+    {{-- @include('mds.partials.event-js') --}}
 
     @endpush

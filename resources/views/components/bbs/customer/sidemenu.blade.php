@@ -14,7 +14,7 @@
                             aria-expanded="false">
                             <div class="d-flex align-items-center"><span class="nav-link-icon"><span
                                         data-feather="server"></span></span><span class="nav-link-text-wrapper"><span
-                                        class="nav-link-text">My Services</span></span>
+                                        class="nav-link-text">My Bookings</span></span>
                             </div>
                         </a>
                     </div>

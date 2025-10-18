@@ -24,7 +24,7 @@
         var label_not_assigned = '<?= get_label('not_assigned', 'Not assigned') ?>';
         var label_duplicate = '<?= get_label('duplicate', 'Duplicate') ?>';
     </script>
-    <script src="{{asset('assets/js/pages/mds/rsp.js')}}"></script>
+    <script src="{{asset('assets/js/pages/bbs/setting/application_setting.js')}}"></script>
     @endsection
 
     @push('script')

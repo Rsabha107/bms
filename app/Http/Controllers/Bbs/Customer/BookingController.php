@@ -215,7 +215,8 @@ class BookingController extends Controller
             ->with('children.children') // recursive depth
             ->orderBy('order_number')
             ->get();
-        $venues = Venue::all();
+        $event = Event::find(session()->get('EVENT_ID'));
+        $venues = $event?->venues;
         $matches = Matches::all();
 
         return view(

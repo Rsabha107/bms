@@ -11,6 +11,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
@@ -33,6 +34,25 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        if (app()->runningInConsole()) {
+            return;
+        }
+
+        try {
+            if (Schema::hasTable('settings')) {
+
+                // Cache for 24 hours (adjust as needed)
+                $settings = Cache::remember('app_settings', now()->addHours(24), function () {
+                    return Setting::pluck('value', 'key')->toArray();
+                });
+
+                config(['settings' => $settings]);
+            }
+        } catch (\Throwable $e) {
+            // Avoid crashing if DB not ready
+            // optional: Log::warning('Settings not loaded: '.$e->getMessage());
+        }
 
         Event::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event) {
             // $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);

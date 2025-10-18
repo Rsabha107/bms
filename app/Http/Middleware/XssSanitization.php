@@ -16,8 +16,9 @@ class XssSanitization
     public function handle(Request $request, Closure $next): Response
     {
         $userInput = $request->all();
-        array_walk_recursive($userInput, function (&$userInput) {
-            $userInput = strip_tags($userInput);
+        $allowedTags = '<p><b><i><u><ul><ol><li><br><strong><em>';
+        array_walk_recursive($userInput, function (&$userInput) use ($allowedTags) {
+            $userInput = strip_tags($userInput, $allowedTags);
         });
         $request->merge($userInput);
 

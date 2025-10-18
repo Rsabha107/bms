@@ -1,4 +1,4 @@
-@extends('mds.admin.layout.admin_template')
+@extends('bbs.admin.layout.admin_template')
 @section('main')
 
 

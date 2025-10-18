@@ -6,7 +6,6 @@
 <!--    Main Content-->
 <!-- ===============================================-->
 
-<div class="content">
     <div class="mt-4">
         <div class="row g-4">
             <!-- this controls the size of the table  -->
@@ -181,6 +180,6 @@
         });
     </script>
 
-    @include('mds.partials.event-js')
+    {{-- @include('mds.partials.event-js') --}}
 
     @endpush
