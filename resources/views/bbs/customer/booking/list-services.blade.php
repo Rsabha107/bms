@@ -1,7 +1,7 @@
 @extends('bbs.customer.layout.customer_template')
 @section('main')
     <div class="d-flex justify-content-between m-2">
-        <div>
+        {{-- <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb breadcrumb-style1">
                     <li class="breadcrumb-item">
@@ -13,12 +13,34 @@
                 </ol>
             </nav>
         </div>
-        {{-- <div>
+        <div> --}}
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1">
+                    @foreach ($breadcrumb as $item)
+                        @if ($item['url'])
+                            <li class="breadcrumb-item">
+                                <a href="{{ $item['url'] }}">{{ $item['title'] }}</a>
+                            </li>
+                        @else
+                            <li class="breadcrumb-item active">
+                                <span>{{ $item['title'] }}</span>
+                            </li>
+                        @endif
+
+                        {{-- @if (!$loop->last)
+                            <span> &gt; </span>
+                        @endif --}}
+                    @endforeach
+            </nav>
+        </div>
+    </div>
+    {{-- <div>
             <x-button_insert_modal bstitle='Add Event' bstarget="#create_event_modal" />
             <!-- <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#create_event_modal"><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title=" <?= get_label('create_event', 'Create Event') ?>"><i class="bx bx-plus"></i></button></a> -->
         </div> --}}
-    </div>
-    <h3 class="text-white mb-4">{{ $selected_menu_display }}</h3>
+    {{-- </div> --}}
+    {{-- <h3 class="text-white mb-4">{{ $selected_menu_display }}</h3> --}}
 
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -41,17 +63,23 @@
                 $form_action = $service->available_slots > 0 ? "route('customer.booking.cart.store')" : '#';
                 $disabled = $service->available_slots > 0 ? '' : 'disabled';
                 // $show_form = $service->available_slots > 0 ? true : false;
+                $menu_name = $service->menu_item?->title ?? 'Service';
+                $menu_parent_name = $service->menu_item?->parent?->title ?? null;
             @endphp
             <div class="col-md-6 col-xxl-3 pull-up">
                 <div class="card h-90 service-card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between" style="height: 70px">
+                        <div class="d-flex justify-content-between" style="height: 110px">
                             <div>
-                                <h5 class="mb-1">{{ $service->title }}
+                                <h5 class="mb-3">{{ $service->title }}
                                     {{-- <span
                                         class="badge badge-phoenix badge-phoenix-warning rounded-pill fs-9 ms-2"><span
-                                            class="badge-label">-6.8%</span></span></h5>
-                                <h6 class="text-body-tertiary">Last 7 days</h6> --}}
+                                            class="badge-label">-6.8%</span></span></h5>  --}}
+                                @if ($menu_parent_name)
+                                    <h6 class="text-body-tertiary">{{ $menu_parent_name }} > {{ $menu_name }}</h6>
+                                @else
+                                    <h6 class="text-body-tertiary">{{ $menu_name }}</h6>
+                                @endif
                             </div>
                             {{-- <h4>16,247</h4> --}}
                             <div id="available_slots">
@@ -60,7 +88,7 @@
                         <hr class="my-3">
 
                         <div class="d-flex justify-content-center">
-                        {{-- <div class="d-flex justify-content-center py-3"> --}}
+                            {{-- <div class="d-flex justify-content-center py-3"> --}}
                             <form action="{{ route('customer.booking.cart.store') }}" method="POST" id="cart-form">
                                 @csrf
                                 <input type="hidden" name="service_id" id="service_id" value="{{ $service->id }}">

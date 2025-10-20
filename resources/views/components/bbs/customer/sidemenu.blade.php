@@ -38,8 +38,8 @@
                         @if ($item->children->isNotEmpty())
                             <!-- multi item-->
                             <div class="nav-item-wrapper">
-                                <a class="nav-link dropdown-indicator label-1" href="#nv-forms" role="button"
-                                    data-bs-toggle="collapse" aria-expanded="false" aria-controls="nv-forms">
+                                <a class="nav-link dropdown-indicator label-1" href="#nv-forms{{$item->id}}" role="button"
+                                    data-bs-toggle="collapse" aria-expanded="false" aria-controls="nv-forms{{$item->id}}">
                                     <div class="d-flex align-items-center">
                                         <div class="dropdown-indicator-icon-wrapper"><span
                                                 class="fas fa-caret-right dropdown-indicator-icon"></span></div><span
@@ -49,7 +49,7 @@
                                 </a>
                                 <div class="parent-wrapper label-1">
                                     <ul class="nav collapse parent" data-bs-parent="#navbarVerticalCollapse"
-                                        id="nv-forms">
+                                        id="nv-forms{{$item->id}}">
                                         <li class="collapsed-nav-item-title d-none">{{ $item->title }}
                                         </li>
                                         @foreach ($item->children as $child)
@@ -59,7 +59,7 @@
                                                     <a class="nav-link {{ session()->get($child->link) == 'active' ? 'active' : '' }}"
                                                         href="{{ route('bbs.customer.booking.menu.show.services', $child->id) }}">
                                                         <div class="d-flex align-items-center"><span
-                                                                class="nav-link-text">{{ $child->title }}</span>
+                                                                class="nav-link-text text-wrap">{{ $child->title }}</span>
                                                         </div>
                                                     </a>
                                                     <!-- more inner pages-->
@@ -79,7 +79,7 @@
                                                     </a>
                                                     <!-- more inner pages-->
                                                     <div class="parent-wrapper">
-                                                        <ul class="nav collapse parent" data-bs-parent="#forms"
+                                                        <ul class="nav collapse parent" data-bs-parent="#forms{{$item->id}}"
                                                             id="nv-basic">
                                                             @foreach ($child->children as $subchild)
                                                             <li class="nav-item"><a class="nav-link"

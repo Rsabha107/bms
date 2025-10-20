@@ -176,7 +176,23 @@ class BookingController extends Controller
         $selected_menu_db = MenuItem::find($id);
         $selected_menu_title = $selected_menu_db->title;
         // get the parent menu title if exists
-        $selected_menu_display = ($selected_menu_db->parent) ? $selected_menu_db->parent->title . '/' . $selected_menu_title : $selected_menu_title;
+        // $selected_menu_display = ($selected_menu_db->parent) ? $selected_menu_db->parent->title . '/' . $selected_menu_title : $selected_menu_title;
+        $selected_menu_display = $selected_menu_title;
+        if ($selected_menu_db->parent) {
+            $breadcrumb = [
+                ['title' => 'Home', 'url' => route('home')],
+                ['title' => $selected_menu_db->parent->title, 'url' => ''],
+                ['title' => $selected_menu_title, 'url' => '']
+            ];
+        } else {
+            $breadcrumb = [
+                ['title' => 'Home', 'url' => route('home')],
+                ['title' => $selected_menu_title, 'url' => '']
+            ];
+        }
+
+        session()->put('breadcrumb', $breadcrumb);
+
         $services = BroadcastService::where('menu_item_id', $id)->get();
         $menus = MenuItem::whereNull('parent_id')
             ->with('children.children') // recursive depth
@@ -195,7 +211,7 @@ class BookingController extends Controller
 
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'selected_menu_display', 'venues', 'matches')
+            compact('services', 'menus', 'breadcrumb', 'venues', 'matches')
         );
     }
 
@@ -219,9 +235,15 @@ class BookingController extends Controller
         $venues = $event?->venues;
         $matches = Matches::all();
 
+        $breadcrumb = [
+            ['title' => 'Home', 'url' => route('home')],
+            ['title' => $selected_menu_display, 'url' => '']
+        ];
+        session()->put('breadcrumb', $breadcrumb);
+
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'selected_menu_display', 'venues', 'matches')
+            compact('services', 'menus', 'breadcrumb', 'venues', 'matches')
         );
     }
 
@@ -251,7 +273,7 @@ class BookingController extends Controller
         try {
             $op = BroadcastBooking::find($id);
             $service_availability = MatchServiceAvailability::where('service_id', $op->service_id)
-            ->where('match_id', $op->match_id)->first();
+                ->where('match_id', $op->match_id)->first();
             $groupKey = $service_availability?->group_key;
             $current_booking_quantity = $op->quantity;
 
