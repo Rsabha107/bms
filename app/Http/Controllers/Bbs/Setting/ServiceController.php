@@ -8,6 +8,7 @@ use App\Models\Bbs\BroadcastService;
 use App\Models\Bbs\Event;
 use App\Models\Bbs\MatchServiceAvailability;
 use App\Models\Bbs\MenuItem;
+use App\Models\Bbs\ServiceVariation;
 use App\Models\Bbs\Venue;
 use App\Models\Mds\DriverStatus;
 use App\Models\Mds\MdsDriver;
@@ -174,11 +175,10 @@ class ServiceController extends Controller
 
         if ($search) {
             $ops = $ops->where(function ($query) use ($search) {
-                $query->where('first_name', 'like', '%' . $search . '%')
-                    ->orWhere('last_name', 'like', '%' . $search . '%')
-                    ->orWhere('mobile_number', 'like', '%' . $search . '%')
-                    ->orWhere('national_identifier_number', 'like', '%' . $search . '%')
-                    ->orWhere('id', 'like', '%' . $search . '%');
+                $query->where('title', 'like', '%' . $search . '%')
+                    ->orWhereHas('menu_item', function ($q) use ($search) {
+                        $q->where('title', 'like', '%' . $search . '%');
+                    });
             });
         }
         $total = $ops->count();
@@ -325,16 +325,40 @@ class ServiceController extends Controller
 
             foreach ($event->matches as $match) {
                 foreach ($event->services as $service) {
-                    MatchServiceAvailability::firstOrCreate([
-                        'match_id' => $match->id,
-                        'service_id' => $service->id,
-                    ], [
-                        'max_slots' => $service->slots_per_match,
-                        'available_slots' => $service->slots_per_match,
-                        'used_slots' => 0,
-                        'group_key' => $service->group_key,
-                        'reservation_limit' => $service->reservation_limit,
-                    ]);
+                    // get the variation exceptions for this service and venue
+                    $variation = ServiceVariation::where('event_id', session()->get('EVENT_ID'))
+                        ->where('service_id', $service->id)
+                        ->where('venue_id', $match->venue_id)
+                        ->first();
+
+                    if ($variation) {
+                        Log::info('Found variation for service ' . $service->id . ' at venue ' . $match->venue_id);
+                        $max_slots = $variation->max_slots;
+                        $reservation_limit = $variation->limit_slots;
+                    } else {
+                        Log::info('No variation found for service ' . $service->id . ' at venue ' . $match->venue_id . '. Using default service settings.');
+                        $max_slots = $service->slots_per_match;
+                        $reservation_limit = $service->reservation_limit;
+                    }
+
+                    MatchServiceAvailability::firstOrCreate(
+                        [
+                            // search criteria
+                            'match_id' => $match->id,
+                            'service_id' => $service->id,
+                        ],
+                        // values to set if not found
+                        [
+                            'max_slots' => $max_slots,
+                            // 'max_slots' => $service->slots_per_match,
+                            // 'available_slots' => $service->slots_per_match,
+                            'available_slots' => $max_slots,
+                            'used_slots' => 0,
+                            'group_key' => $service->group_key,
+                            // 'reservation_limit' => $service->reservation_limit,
+                            'reservation_limit' => $reservation_limit,
+                        ]
+                    );
                 }
             }
 

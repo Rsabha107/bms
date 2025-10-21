@@ -8,7 +8,7 @@
             <form class="row g-3 needs-validation form-submit-event" id="{{ $formId }}" novalidate=""
                 action="{{ $formAction }}" method="POST">
                 @csrf
-                <input type="hidden" id="add_table" name="table" value="vapp_variation_table" />
+                <input type="hidden" id="add_table" name="table" value="service_variation_table" />
                 <input type="hidden" id="add_event_id" name="event_id" />
                 <div class="card">
                     <div class="card-header d-flex align-items-center border-bottom">
@@ -30,6 +30,13 @@
                                 addDynamicButton="0" />
                         </div>
 
+                        <div class="row mb-3">
+                            <x-formy.form_select class="col-sm-6 col-md-12" floating="0" selectedValue=""
+                                name="venue_id" elementId="add_venue_id" label="Venue" required="required"
+                                :forLoopCollection="$venues" itemIdForeach="id" itemTitleForeach="title" style=""
+                                addDynamicButton="0" />
+                        </div>
+
                         {{-- <div class="row mb-3">
                             <div class="col-sm-6 col-md-12">
                                 <label class="form-label" for="add_venue_id">Functional Area assignment
@@ -42,12 +49,12 @@
                             </div>
                         </div> --}}
 
-                        <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <x-formy.select_multiple class="col-sm-6 col-md-12" name="venue_id[]"
                                 elementId="add_venue_id" label="Venue assignment (multiple)" :forLoopCollection="$venues"
                                 itemIdForeach="id" itemTitleForeach="title" required="" style="width: 100%"
                                 edit="0" />
-                        </div>
+                        </div> --}}
 
                         <div class="row mb-3">
                             <x-formy.form_input class="col-sm-6 col-md-12" floating="1" inputValue=""

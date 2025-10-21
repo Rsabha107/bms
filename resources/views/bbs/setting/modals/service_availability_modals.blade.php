@@ -34,8 +34,8 @@
         />
 </div>
 
-{{-- <div class="offcanvas offcanvas-end offcanvas-filter-modal in" id="scheduleFilterOffcanvas" tabindex="-1"
+<div class="offcanvas offcanvas-end custom-offcanvas offcanvas-filter-modal in" id="filterOffcanvas" tabindex="-1"
     aria-labelledby="offcanvasWithBackdropLabel">
-    <x-setting.admin-schedule-filter-drawer id="" formAction="" formId="filter_schedule_form"
-        :events="$events" :venues="$venues" :rsps="$rsps" :schedules="$schedules" :globalYn="$global_yn" />
-</div> --}}
+    <x-bbs.admin.admin-booking-filter-drawer id="" formAction="" formId="filter_order_form" 
+        :venues="$venues" :matches="$matches" :services="$broadcast_services"/>
+</div>

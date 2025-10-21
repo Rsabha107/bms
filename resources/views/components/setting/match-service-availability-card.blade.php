@@ -37,6 +37,7 @@
                             <!-- <th data-checkbox="true"></th> -->
                             <!-- <th data-sortable="true" data-field="id" class="align-middle white-space-wrap fw-bold fs-9"><?= get_label('id', 'ID') ?></th> -->
                             <!-- <th data-sortable="false" data-field="image" data-visible="false" class="align-middle"></th> -->
+                            <th data-sortable="false" data-field="venue" data-visible="true" class="align-middle">Venue</th>
                             <th data-sortable="false" data-field="match" data-visible="true" class="align-middle">Match</th>
                             <th data-sortable="true" data-field="service" class="align-middle review">Service</th>
                             <th data-sortable="true" data-field="group_key" class="align-middle review">Group Key</th>

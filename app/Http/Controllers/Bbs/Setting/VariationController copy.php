@@ -72,22 +72,22 @@ class VariationController extends Controller
         ]);
     }
 
-    // public function get_inventory_variation_info($id)
-    // {
-    //     $variation = VappVariation::findOrFail($id);
-    //     $funcitonal_areas = $variation->functional_areas;
-    //     $vapp_sizes = $variation->vapp_sizes()->select('vapp_sizes.id', 'vapp_sizes.title')->get();
-    //     $venues = $variation->venues;
-    //     $matchs = $variation->matchs;
+    public function get_inventory_variation_info($id)
+    {
+        $variation = VappVariation::findOrFail($id);
+        $funcitonal_areas = $variation->functional_areas;
+        $vapp_sizes = $variation->vapp_sizes()->select('vapp_sizes.id', 'vapp_sizes.title')->get();
+        $venues = $variation->venues;
+        $matchs = $variation->matchs;
 
-    //     return response()->json([
-    //         'variation' => $variation,
-    //         'functional_areas' => $funcitonal_areas,
-    //         'vapp_sizes' => $vapp_sizes,
-    //         'venues' => $venues,
-    //         'matchs' => $matchs,
-    //     ]);
-    // }
+        return response()->json([
+            'variation' => $variation,
+            'functional_areas' => $funcitonal_areas,
+            'vapp_sizes' => $vapp_sizes,
+            'venues' => $venues,
+            'matchs' => $matchs,
+        ]);
+    }
 
     public function list()
     {
@@ -131,7 +131,7 @@ class VariationController extends Controller
             appLog('mds_date_range_filter: ' . $mds_date_range_filter);
             appLog('dates: ' . count($dates));
             $startDate = trim($dates[0]);
-            appLog($startDate);
+            appLog($dates . length);
             if (count($dates) > 1) {
                 $endDate = trim($dates[1]);
             } else {
@@ -179,7 +179,7 @@ class VariationController extends Controller
             $delete_action =
                 '<a href="javascript:void(0)" class="btn btn-sm" data-table="service_variation_table" data-id="' .
                 $op->id .
-                '" id="delete_service_variation" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
+                '" id="delete_parking_variation" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete">' .
                 '<i class="fa-solid fa-trash text-danger"></i></a></div></div>';
 
 
@@ -199,9 +199,10 @@ class VariationController extends Controller
             return  [
                 // 'id' => $op->id,
                 'id' => '<div class="align-middle white-space-wrap fs-9 ps-2">VAR-' . $op->id . '</div>',
+                // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-8 ps-2">' .$venue->id. '</div>',
                 'event' => '<div class="align-middle white-space-wrap fs-9 ps-2">' . $op->event?->name . '</div>',
                 'service_title' => '<div class="align-middle white-space-wrap fs-9 ps-2">' . $op->service->title . '</div>',
-                'venue' => '<div class="align-middle white-space-wrap fs-9 ps-2">' . $op->venue?->title . '</div>',
+                'venue' => '<div class="align-middle white-space-wrap fs-9 ps-2">' . $venue_display . '</div>',
                 'max_slots' => '<div class="align-middle white-space-wrap fs-9 ps-2">' . $op->max_slots . '</div>',
                 'limit_slots' => '<div class="align-middle white-space-wrap fs-9 ps-2">' . $op->limit_slots . '</div>',
                 'actions' => $actions,
@@ -235,6 +236,7 @@ class VariationController extends Controller
             ],
             'event_id' => 'required',
             'venue_id' => 'required',
+            // 'venue_id' => 'required_if:match_category_id,' . getMatchCategoryIdByLabel('ALL'),
             'max_slots' => 'required',
             'limit_slots' => 'required',
         ];
@@ -255,14 +257,13 @@ class VariationController extends Controller
             return response()->json(['error' => $error, 'message' => $message]);
         }
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $error = false;
             $message = 'Service Variation created succesfully.' . $op->id;
 
             $op->event_id = session()->get('EVENT_ID');
-            $op->event_id = $request->event_id;
-            $op->venue_id = $request->venue_id;
+            // $op->event_id = $request->event_id;
             $op->service_id = $request->service_id;
             $op->max_slots = $request->max_slots;
             $op->limit_slots = $request->limit_slots;
@@ -271,15 +272,91 @@ class VariationController extends Controller
 
             $op->save();
 
+            // if ($request->match_id) {
+            //     foreach ($request->match_id as $key => $data) {
+            //         $op->matchs()->attach($request->match_id[$key]);
+            //     }
+            // }
+            if ($request->venue_id) {
+                foreach ($request->venue_id as $key => $data) {
+                    $op->venues()->attach($request->venue_id[$key]);
+                }
+            }
+
+            DB::commit();
             return response()->json(['error' => $error, 'message' => $message]);
         } catch (\Exception $e) {
-            // DB::rollBack();
+            DB::rollBack();
             Log::error('Error creating Service Variation: ' . $e->getMessage());
             $error = true;
             $message = 'An error occurred while creating the Service Variation. Please try again.';
             return response()->json(['error' => $error, 'message' => $message]);
         }
     }
+
+    // public function inventory_store(Request $request)
+    // {
+    //     //
+    //     // dd($request);
+    //     $user_id = Auth::user()->id;
+    //     $op = new VappInventory();
+
+    //     $rules = [
+    //         'parking_id' => 'required',
+    //         'event_id' => 'required',
+    //         'venue_id' => 'required',
+    //         'match_category_id' => 'required',
+    //         'variation_id' => 'required',
+    //         'vapp_size_id' => 'required',
+    //         'total_vaps' => 'required|numeric|min:0',
+    //         'printed_vaps' => 'required|numeric|min:0',
+    //         'parking_id' => [
+    //             Rule::unique('vapp_inventories')->where(function ($query) use ($request) {
+    //                 return $query->where('parking_id', $request->parking_id)
+    //                     ->where('event_id', $request->event_id)
+    //                     ->where('venue_id', $request->event_id)
+    //                     ->where('variation_id', $request->variation_id)
+    //                     ->where('match_category_id', $request->match_category_id)
+    //                     ->where('vapp_size_id', $request->vapp_size_id);
+    //             }),
+    //         ],
+    //     ];
+
+    //     $message = ['parking_id.unique' => 'This VAPP Inventory already exists for this Parking, Event, Variation and VAPP Size.'];
+    //     $validator = Validator::make($request->all(), $rules, $message);
+
+    //     if ($validator->fails()) {
+    //         $error = true;
+    //         $message = implode($validator->errors()->all('<div>:message</div>'));  // use this for json/jquery
+    //     } else {
+
+    //         $error = false;
+    //         $message = 'VAPP Inventroy created succesfully.' . $op->id;
+
+    //         $op->event_id = $request->event_id;
+    //         $op->venue_id = $request->venue_id;
+    //         $op->parking_id = $request->parking_id;
+    //         $op->variation_id = $request->variation_id;
+    //         $op->match_category_id = $request->match_category_id;
+    //         $op->match_id = intval($request->match_id);
+    //         $op->vapp_size_id = $request->vapp_size_id;
+    //         $op->total_vaps = $request->total_vaps;
+    //         $op->printed_vaps = $request->printed_vaps;
+    //         $op->active_flag = 1;
+    //         // $op->match_id = $request->match_id;
+    //         $op->created_by = $user_id;
+    //         $op->updated_by = $user_id;
+
+    //         $op->save();
+    //     }
+
+    //     $notification = array(
+    //         'message'       => 'Parking created successfully',
+    //         'alert-type'    => 'success'
+    //     );
+
+    //     return response()->json(['error' => $error, 'message' => $message]);
+    // }
 
     public function update(Request $request)
     {
@@ -321,34 +398,33 @@ class VariationController extends Controller
             $message = implode($validator->errors()->all('<div>:message</div>'));  // use this for json/jquery
             return response()->json(['error' => $error, 'message' => $message]);
         }
-        // DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $error = false;
             $message = 'Service Variation updated succesfully.' . $op->id;
 
             $op->event_id = $request->event_id;
             $op->service_id = $request->service_id;
-            $op->venue_id = $request->venue_id;
             $op->max_slots = $request->max_slots;
             $op->limit_slots = $request->limit_slots;
             $op->updated_by = $user->id;
 
             $op->save();
 
-            // $op->venues()->detach();
-            // // $op->matchs()->detach();
+            $op->venues()->detach();
+            // $op->matchs()->detach();
 
 
-            // if ($request->venue_id) {
-            //     foreach ($request->venue_id as $key => $data) {
-            //         $op->venues()->attach($request->venue_id[$key]);
-            //     }
-            // }
+            if ($request->venue_id) {
+                foreach ($request->venue_id as $key => $data) {
+                    $op->venues()->attach($request->venue_id[$key]);
+                }
+            }
 
-            // DB::commit();
+            DB::commit();
             return response()->json(['error' => $error, 'message' => $message]);
         } catch (\Exception $e) {
-            // DB::rollBack();
+            DB::rollBack();
             Log::error('Error updating Service Variation: ' . $e->getMessage());
             $error = true;
             $message = 'An error occurred while updating the Service Variation. Please try again.';
@@ -358,14 +434,20 @@ class VariationController extends Controller
 
     public function delete($id)
     {
-        $ws = ServiceVariation::findOrFail($id);
+        $ws = VappVariation::findOrFail($id);
         $ws->delete();
 
+        if ($ws->functional_areas) {
+            $ws->functional_areas()->detach();
+        }
+        if ($ws->vapp_sizes) {
+            $ws->vapp_sizes()->detach();
+        }
         $error = false;
-        $message = 'Variation deleted successfully.';
+        $message = 'Parking deleted succesfully.';
 
         $notification = array(
-            'message'       => 'Variation deleted successfully',
+            'message'       => 'Parking deleted successfully',
             'alert-type'    => 'success'
         );
 
@@ -373,51 +455,51 @@ class VariationController extends Controller
         // return redirect()->route('tracki.setup.workspace')->with($notification);
     } // delete
 
-    // public function getView($id)
-    // {
-    //     $variation = VappVariation::find($id);
-    //     $events = Event::all();
-    //     $parkings = ParkingMaster::all();
-    //     $venues = Venue::all();
-    //     $matchs = MatchList::all();
-    //     $vapp_sizes = VappSize::all();
+    public function getView($id)
+    {
+        $variation = VappVariation::find($id);
+        $events = Event::all();
+        $parkings = ParkingMaster::all();
+        $venues = Venue::all();
+        $matchs = MatchList::all();
+        $vapp_sizes = VappSize::all();
 
-    //     $view = view('/vapp/setting/variation/mv/edit', [
-    //         'variation' => $variation,
-    //         'venues' => $venues,
-    //         'matchs' => $matchs,
-    //         'events' => $events,
-    //         'vappSizes' => $vapp_sizes,
-    //         'parkings' => $parkings,
-    //     ])->render();
+        $view = view('/vapp/setting/variation/mv/edit', [
+            'variation' => $variation,
+            'venues' => $venues,
+            'matchs' => $matchs,
+            'events' => $events,
+            'vappSizes' => $vapp_sizes,
+            'parkings' => $parkings,
+        ])->render();
 
-    //     return response()->json(['view' => $view]);
-    // }  // End function getProjectView
+        return response()->json(['view' => $view]);
+    }  // End function getProjectView
 
-    // public function getAssicatedFunctionalAreas($id)
-    // {
-    //     $parkingMaster = ParkingMaster::with('functional_areas')
-    //         ->with('vapp_sizes')->find($id);
-    //     // $functional_areas = $parkingMaster->functional_areas;
+    public function getAssicatedFunctionalAreas($id)
+    {
+        $parkingMaster = ParkingMaster::with('functional_areas')
+            ->with('vapp_sizes')->find($id);
+        // $functional_areas = $parkingMaster->functional_areas;
 
-    //     return response()->json([
-    //         'functional_areas' => $parkingMaster->functional_areas,
-    //         'vapp_sizes' => $parkingMaster->vapp_sizes,
-    //     ]);
-    //     // return response()->json(['associated_fa' => $functional_areas]);
-    // }  // End function getAssicatedFunctionalAreas
+        return response()->json([
+            'functional_areas' => $parkingMaster->functional_areas,
+            'vapp_sizes' => $parkingMaster->vapp_sizes,
+        ]);
+        // return response()->json(['associated_fa' => $functional_areas]);
+    }  // End function getAssicatedFunctionalAreas
 
-    // public function getParkingCodeFromEvent($id)
-    // {
-    //     $parkingMaster = ParkingMaster::where('event_id', $id)->get();
-    //     // $functional_areas = $parkingMaster->functional_areas;
+    public function getParkingCodeFromEvent($id)
+    {
+        $parkingMaster = ParkingMaster::where('event_id', $id)->get();
+        // $functional_areas = $parkingMaster->functional_areas;
 
-    //     return response()->json([
-    //         'parkings' => $parkingMaster,
-    //         // 'vapp_sizes' => $parkingMaster->vapp_sizes,
-    //     ]);
-    //     // return response()->json(['associated_fa' => $functional_areas]);
-    // }  // End function getParkingCodeFromEvent
+        return response()->json([
+            'parkings' => $parkingMaster,
+            // 'vapp_sizes' => $parkingMaster->vapp_sizes,
+        ]);
+        // return response()->json(['associated_fa' => $functional_areas]);
+    }  // End function getParkingCodeFromEvent
 
 
 }

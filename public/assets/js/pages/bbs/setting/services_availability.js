@@ -3,7 +3,6 @@ $(document).ready(function () {
 
     // ************************************************** task venues
 
-
     $("body").on("click", "#get_tinymce_content", function (e) {
         e.preventDefault();
         console.log("inside get_tinymce_content");
@@ -12,43 +11,55 @@ $(document).ready(function () {
         console.log("content", content);
     });
 
-    $("body").on("click", "#offcanvas-add-match-service-availability", function () {
-        console.log("inside #offcanvas-add-match-service-availability");
-        // $("#add_edit_form").get(0).reset()
-        // console.log(window.choices.removeActiveItems())
-        $("#cover-spin").show();
-        $("#offcanvas-add-match-service-availability-modal").offcanvas("show");
-        $("#cover-spin").hide();
-    });
+    $("body").on(
+        "click",
+        "#offcanvas-add-match-service-availability",
+        function () {
+            console.log("inside #offcanvas-add-match-service-availability");
+            // $("#add_edit_form").get(0).reset()
+            // console.log(window.choices.removeActiveItems())
+            $("#cover-spin").show();
+            $("#offcanvas-add-match-service-availability-modal").offcanvas(
+                "show"
+            );
+            $("#cover-spin").hide();
+        }
+    );
 
-    $("body").on("click", "#edit_match_service_availability_offcanvas", function () {
-        console.log("inside #edit_match_service_availability_offcanvas");
-        $("#cover-spin").show();
-        var id = $(this).data("id");
-        var table = $(this).data("table");
-        console.log("id", id);
-        console.log("table", table);
-        $.ajax({
-            url: "/bbs/match/service/availability/mv/get/" + id,
-            method: "GET",
-            async: true,
-            success: function (response) {
-                g_response = response.view;
-                // console.log("g_response", g_response);
-                $("#global-edit-match-service-availability-content")
-                    .empty("")
-                    .append(g_response);
-                $("#edit_schedule_table").val(table);
-                $("#offcanvas-edit-match-service-availability-modal").offcanvas("show");
-                $("#cover-spin").hide();
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-                $("#cover-spin").hide();
-            },
-        });
-    });
+    $("body").on(
+        "click",
+        "#edit_match_service_availability_offcanvas",
+        function () {
+            console.log("inside #edit_match_service_availability_offcanvas");
+            $("#cover-spin").show();
+            var id = $(this).data("id");
+            var table = $(this).data("table");
+            console.log("id", id);
+            console.log("table", table);
+            $.ajax({
+                url: "/bbs/match/service/availability/mv/get/" + id,
+                method: "GET",
+                async: true,
+                success: function (response) {
+                    g_response = response.view;
+                    // console.log("g_response", g_response);
+                    $("#global-edit-match-service-availability-content")
+                        .empty("")
+                        .append(g_response);
+                    $("#edit_schedule_table").val(table);
+                    $(
+                        "#offcanvas-edit-match-service-availability-modal"
+                    ).offcanvas("show");
+                    $("#cover-spin").hide();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                    $("#cover-spin").hide();
+                },
+            });
+        }
+    );
 
     // $("body").on("click", "#editService", function () {
     //     console.log('inside editService')
@@ -129,6 +140,9 @@ $("body").on("click", "#deleteServiceAvailability", function (e) {
 ("use strict");
 function queryParams(p) {
     return {
+        match_filter: $("#match_filter").val(),
+        venue_filter: $("#venue_filter").val(),
+        service_filter: $("#service_filter").val(),
         page: p.offset / p.limit + 1,
         limit: p.limit,
         sort: p.sort,
@@ -147,11 +161,25 @@ window.icons = {
     export_data: "bx-list-ul",
 };
 
+    $("#match_filter, #venue_filter, #service_filter").on("change", function(e) {
+        e.preventDefault();
+        console.log("storage card on change");
+
+        // let match_filter = $("#match_filter").val();
+        // let venue_filter = $("#venue_filter").val();
+        // let service_filter = $("#service_filter").val();
+
+        // $("#export_service_filter").val(service_filter);
+        // $("#export_event_filter").val(event_filter);
+        // $("#export_venue_filter").val(venue_filter);
+
+        $("#services_availability_table").bootstrapTable("refresh");
+    });
+
+
 function loadingTemplate(message) {
     return '<i class="bx bx-loader-alt bx-spin bx-flip-vertical" ></i>';
 }
-
-
 
 function actionsFormatter(value, row, index) {
     return [

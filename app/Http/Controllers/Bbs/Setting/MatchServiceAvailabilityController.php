@@ -7,6 +7,7 @@ use App\Models\Bbs\BroadcastService;
 use App\Models\Bbs\Event;
 use App\Models\Bbs\Matches;
 use App\Models\Bbs\MatchServiceAvailability;
+use App\Models\Bbs\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -25,8 +26,10 @@ class MatchServiceAvailabilityController extends Controller
         $match_services_availability = MatchServiceAvailability::all();
         $matches = Matches::all();
         $broadcast_services = BroadcastService::all();
+        $event = Event::where('id', session()->get('EVENT_ID'))->first();
+        $venues = $event->venues; // $event->venues;
         // $menus = MenuItem::whereNotNull('parent_id')->with('children')->orderBy('order_number')->get();
-        return view('bbs.setting.match-service-availability.list', compact('match_services_availability', 'broadcast_services', 'matches'));
+        return view('bbs.setting.match-service-availability.list', compact('match_services_availability', 'broadcast_services', 'matches', 'venues'));
     }
 
     public function switch($id = null)
@@ -59,6 +62,9 @@ class MatchServiceAvailabilityController extends Controller
     public function list()
     {
         $search = request('search');
+        $match_filter = (request()->match_filter) ? request()->match_filter : "";
+        $venue_filter = (request()->venue_filter) ? request()->venue_filter : "";
+        $service_filter = (request()->service_filter) ? request()->service_filter : "";
         $sort = (request('sort')) ? request('sort') : "id";
         $order = (request('order')) ? request('order') : "DESC";
         $ops = MatchServiceAvailability::orderBy($sort, $order);
@@ -68,13 +74,29 @@ class MatchServiceAvailabilityController extends Controller
                 $query->WhereHas(
                     'match',
                     function ($match) use ($search) {
-                        $match->where('match_code', 'like', '%' . $search . '%');
+                        $match->where('match_code', 'like', '%' . $search . '%')
+                            ->orWhere('venue_name', 'like', '%' . $search . '%');
                     }
                 )->orWhereHas('service', function ($service) use ($search) {
                     $service->where('title', 'like', '%' . $search . '%');
                 });
             });
         }
+
+        if ($match_filter) {
+            $ops = $ops->where('match_id', $match_filter);
+        }
+
+        if ($venue_filter) {
+            $ops = $ops->whereHas('match', function ($venue) use ($venue_filter) {
+                $venue->where('venue_id', $venue_filter);
+            });
+        }
+
+        if ($service_filter) {
+            $ops = $ops->where('service_id', $service_filter);
+        }
+
         $total = $ops->count();
         $ops = $ops->paginate(request("limit"))->through(function ($op) {
 
@@ -88,6 +110,7 @@ class MatchServiceAvailabilityController extends Controller
                 'id' => $op->id,
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-9 ps-2">' .$op->id. '</div>',
                 'match' => $op->match->match_code,
+                'venue' => $op->match->venue_name,
                 'service' => $op->service->title,
                 'group_key' => '<div class="align-middle text-wrap fs-9 ps-3">' . $op->group_key . '</div>',
                 'max_slots' => '<div class="align-middle text-wrap fs-9 ps-3">' . $op->max_slots . '</div>',

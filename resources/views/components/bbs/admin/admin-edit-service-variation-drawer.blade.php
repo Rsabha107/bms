@@ -4,7 +4,7 @@
             <form class="row g-3 needs-validation form-submit-event" id="{{ $formId }}" novalidate=""
                 action="{{ $formAction }}" method="POST">
                 @csrf
-                <input type="hidden" id="edit_table" name="table" value="vapp_variation_table" />
+                <input type="hidden" id="edit_table" name="table" value="service_variation_table" />
                 <input type="hidden" id="edit_variation_id" name="id" value="">
                 <div class="card">
                     <div class="card-header d-flex align-items-center border-bottom">
@@ -26,10 +26,10 @@
                                 addDynamicButton="0" />
                         </div>
                         <div class="row mb-3">
-                            <x-formy.select_multiple class="col-sm-6 col-md-12" name="venue_id[]"
-                                elementId="edit_venue_id" label="Venue assignment (multiple)" :forLoopCollection="$venues"
-                                itemIdForeach="id" itemTitleForeach="title" required="" style="width: 100%"
-                                edit="0" />
+                            <x-formy.form_select class="col-sm-6 col-md-12" floating="1" selectedValue=""
+                                name="venue_id" elementId="edit_venue_id" label="Venue" required="required"
+                                :forLoopCollection="$venues" itemIdForeach="id" itemTitleForeach="title" style=""
+                                addDynamicButton="0" />
                         </div>
 
                         <div class="row mb-3">
@@ -43,13 +43,6 @@
                                 name="limit_slots" elementId="edit_limit_slots" inputType="text" label="Limit Slots"
                                 required="required" disabled="0" inputAttributes="" />
                         </div>
-
-                        {{-- <div class="row mb-3">
-                            <x-formy.select_multiple class="col-sm-6 col-md-12" name="vapp_size_id[]"
-                                elementId="edit_vapp_size_id" label="VAPP Size assignment (multiple)" :forLoopCollection="$vappSizes"
-                                itemIdForeach="id" itemTitleForeach="title" required="" style="width: 100%"
-                                edit="0" />
-                        </div> --}}
 
                         <div class="col-12 gy-3">
                             <div class="row g-3 justify-content-end">
