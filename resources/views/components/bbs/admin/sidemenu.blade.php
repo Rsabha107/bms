@@ -131,6 +131,7 @@
                 </div>
             </a>
         </div>
+        @if (Auth::user()->hasRole('SecurityRole'))
         <div class="nav-item-wrapper">
             <a class="nav-link label-1 {{ Request::is('/bbs-match-service-availability') ? 'active' : '' }}"
                 href="{{ route('bbs.setting.match.service.availability.generate') }}" role="button" data-bs-toggle=""
@@ -142,6 +143,7 @@
                 </div>
             </a>
         </div>
+        @endif
         @endcan
 
     </li>

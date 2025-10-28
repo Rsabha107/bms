@@ -112,12 +112,12 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
         });
     });
 
-    Route::middleware(['auth', 'otp', 'mutli.event', 'role:SuperAdmin', 'roles:admin', 'prevent-back-history', 'auth.session'])->group(function () {
-        Route::controller(ServiceController::class)->group(function () {
-            Route::post('/bbs/setting/service/store', 'store')->name('bbs.setting.service.store');
-            Route::post('bbs/setting/service/update', 'update')->name('bbs.setting.service.update');
-        });
-    });
+    // Route::middleware(['auth', 'otp', 'mutli.event', 'role:SuperAdmin', 'roles:admin', 'prevent-back-history', 'auth.session'])->group(function () {
+    //     Route::controller(ServiceController::class)->group(function () {
+    //         Route::post('/bbs/setting/service/store', 'store')->name('bbs.setting.service.store');
+    //         Route::post('bbs/setting/service/update', 'update')->name('bbs.setting.service.update');
+    //     });
+    // });
 
     // Setting ROUTE ******************************************************************** Admin All Route
     Route::middleware(['auth', 'otp', 'mutli.event', 'XssSanitizer', 'role:SuperAdmin', 'roles:admin', 'prevent-back-history', 'auth.session'])->group(function () {

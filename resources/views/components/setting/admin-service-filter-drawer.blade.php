@@ -6,7 +6,7 @@
                 @csrf
                 <input type="hidden" id="add_table" name="table" value="schedule_table" />
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Schedule Filters</h5>
+                    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Filters</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="card">
@@ -19,7 +19,7 @@
                                     data-options='{"mode":"range","dateFormat":"d/m/y","disableMobile":true}' />
                             </div>
                         </div>
-                        <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <x-formy.form_select class="col-sm-6 col-md-12 mb-3" floating="1" selectedValue=""
                                 name="event_id" elementId="mds_schedule_event_filter" label="Event" required="required"
                                 :forLoopCollection="$events" itemIdForeach="id" itemTitleForeach="name" style=""
@@ -36,7 +36,7 @@
                                 name="rsp_id" elementId="mds_schedule_rsp_filter" label="RSP" required="required"
                                 :forLoopCollection="$rsps" itemIdForeach="id" itemTitleForeach="title" style=""
                                 addDynamicButton="0" />
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="modal-footer d-flex justify-content-end align-items-center px-4 pb-4 border-0 pt-3">
                         <div class="col-12 gy-3">

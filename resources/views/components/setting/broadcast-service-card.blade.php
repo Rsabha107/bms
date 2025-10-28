@@ -37,10 +37,13 @@
                             <!-- <th data-checkbox="true"></th> -->
                             <!-- <th data-sortable="true" data-field="id" class="align-middle white-space-wrap fw-bold fs-9"><?= get_label('id', 'ID') ?></th> -->
                             <!-- <th data-sortable="false" data-field="image" data-visible="false" class="align-middle"></th> -->
+                            <th data-sortable="false" data-field="parent_menue_id" data-visible="true" class="align-middle">Parent Menu</th>
                             <th data-sortable="false" data-field="menu_item_id" data-visible="true" class="align-middle">Menu Item</th>
                             <th data-sortable="true" data-field="title" class="align-middle review">Title</th>
                             <th data-sortable="true" data-field="short_description" class="align-middle review">Short Desc</th>
                             <th data-sortable="true" data-field="long_description" data-visible="false" class="align-middle">Description</th>
+                            <th data-sortable="true" data-field="unit_price" class="align-middle text-center"><?= get_label('unit_price', 'Unit Price') ?></th>
+                            <th data-sortable="true" data-field="slots_per_match" class="align-middle text-center"><?= get_label('slots_per_match', 'Slots per Match') ?></th>
                             <th data-sortable="true" data-field="created_at" data-visible="false"><?= get_label('created_at', 'Created at') ?></th>
                             <th data-sortable="true" data-field="updated_at" data-visible="false"><?= get_label('updated_at', 'Updated at') ?></th>
                             <th data-formatter="actionsFormatter" class="text-end"><?= get_label('actions', 'Actions') ?></th>

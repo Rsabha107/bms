@@ -116,6 +116,7 @@ class ServiceController extends Controller
                     });
             });
         }
+
         $total = $ops->count();
         $ops = $ops->paginate(request("limit"))->through(function ($op) {
 
@@ -129,11 +130,13 @@ class ServiceController extends Controller
                 'id' => $op->id,
                 // 'id' => '<div class="align-middle white-space-wrap fw-bold fs-9 ps-2">' .$op->id. '</div>',
                 'image' => $image,
+                'parent_menue_id' => '<div class="align-middle text-wrap fs-9 ps-3">' . ($op->menu_item?->parent?->title ?? $op->menu_item?->title) . '</div>',
                 'menu_item_id' => '<div class="align-middle text-wrap fs-9 ps-3">' . $op->menu_item?->title . '</div>',
                 'title' => '<div class="align-middle text-wrap fs-9 ps-3">' . $op->title . '</div>',
                 'short_description' => '<div class="align-middle text-wrap  fs-9 ps-3" >' . $op->short_description . '</div>',
                 'long_description' => '<div class="align-middle text-wrap fs-9 ps-3">' . $op->long_description . '</div>',
-
+                'unit_price' => '<div class="align-middle text-center fs-9 ps-3">' . number_format($op->unit_price, 2) . ' Є</div>',
+                'slots_per_match' => '<div class="align-middle text-center fs-9 ps-3">' . $op->slots_per_match . '</div>',
                 'created_at' => format_date($op->created_at,  'H:i:s'),
                 'updated_at' => format_date($op->updated_at, 'H:i:s'),
             ];
@@ -145,72 +148,72 @@ class ServiceController extends Controller
         ]);
     }
 
-    public function storeService(Request $request)
-    {
-        //
-        // dd($request->all());
-        $user_id = Auth::user()->id;
-        $booking = new BroadcastBooking();
+    // public function storeService(Request $request)
+    // {
+    //     //
+    //     // dd($request->all());
+    //     $user_id = Auth::user()->id;
+    //     $booking = new BroadcastBooking();
 
-        $rules = [
-            'service_id' => 'required',
-            'quantity' => 'required',
-            // 'x' => 'required',
-        ];
+    //     $rules = [
+    //         'service_id' => 'required',
+    //         'quantity' => 'required',
+    //         // 'x' => 'required',
+    //     ];
 
-        $validator = Validator::make($request->all(), $rules);
+    //     $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            Log::info($validator->errors()->all(':message'));
-            $type = 'error';
-            // $message = implode($validator->errors()->all(':message'));  // use this for json/jquery
-            $message = implode($validator->errors()->all('<div>:message</div>'));  // use this for json/jquery
-            Log::info($message);
-            // $message = $validator->errors()->all(':message');
-            $notification = array(
-                'message'       => $message,
-                'alert-type'    => $type
-            );
-            return redirect()->back()->with($notification);
-        } else {
+    //     if ($validator->fails()) {
+    //         Log::info($validator->errors()->all(':message'));
+    //         $type = 'error';
+    //         // $message = implode($validator->errors()->all(':message'));  // use this for json/jquery
+    //         $message = implode($validator->errors()->all('<div>:message</div>'));  // use this for json/jquery
+    //         Log::info($message);
+    //         // $message = $validator->errors()->all(':message');
+    //         $notification = array(
+    //             'message'       => $message,
+    //             'alert-type'    => $type
+    //         );
+    //         return redirect()->back()->with($notification);
+    //     } else {
 
-            // check number of slots available.  if available slots = 0 then exit with a warning message.
-            // this is incase a user grabed the last slot with this user is waiting ..
+    //         // check number of slots available.  if available slots = 0 then exit with a warning message.
+    //         // this is incase a user grabed the last slot with this user is waiting ..
 
 
-            $error = false;
-            $type = 'success';
-            $message = 'Booking created succesfully.' . $booking->id;
+    //         $error = false;
+    //         $type = 'success';
+    //         $message = 'Booking created succesfully.' . $booking->id;
 
-            // $booking->booking_ref_number = 'MDS' . $booking->id;
-            // $booking->schedule_id =  $timeslots->delivery_schedule_id;
-            $booking->service_id = $request->service_id;
-            $booking->quantity = intval($request->quantity);
-            $booking->unit_price = intval($request->unit_price);
-            $booking->total_price = intval($request->quantity) * intval($request->unit_price);
-            $booking->quantity = intval($request->quantity);
-            $booking->created_by = $user_id;
-            $booking->updated_by = $user_id;
-            $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
-            $service = BroadcastService::find($request->service_id);
+    //         // $booking->booking_ref_number = 'MDS' . $booking->id;
+    //         // $booking->schedule_id =  $timeslots->delivery_schedule_id;
+    //         $booking->service_id = $request->service_id;
+    //         $booking->quantity = intval($request->quantity);
+    //         $booking->unit_price = intval($request->unit_price);
+    //         $booking->total_price = intval($request->quantity) * intval($request->unit_price);
+    //         $booking->quantity = intval($request->quantity);
+    //         $booking->created_by = $user_id;
+    //         $booking->updated_by = $user_id;
+    //         $booking->event_id = session()->get('EVENT_ID'); // Tie booking to current event
+    //         $service = BroadcastService::find($request->service_id);
 
-            $service->available_slots = $service->available_slots - $request->quantity;
-            $service->used_slots = $service->used_slots + $request->quantity;
-            // $booking->event_id = session()->get('EVENT_ID');
-            // $booking->booking_date = Carbon::createFromFormat('d/m/Y', $request->booking_date)->toDateString();
+    //         $service->available_slots = $service->available_slots - $request->quantity;
+    //         $service->used_slots = $service->used_slots + $request->quantity;
+    //         // $booking->event_id = session()->get('EVENT_ID');
+    //         // $booking->booking_date = Carbon::createFromFormat('d/m/Y', $request->booking_date)->toDateString();
 
-            $service->save();
-            $booking->save();
+    //         $service->save();
+    //         $booking->save();
 
-            $notification = array(
-                'message'       => $message,
-                'alert-type'    => $type
-            );
-        }
-        return redirect()->route('bbs.admin.booking.cart')->with($notification);
-        // return view('bbs.customer.booking.cart');
-        // return response()->json(['error' => $error, 'message' => $message]);
-    }
+    //         $notification = array(
+    //             'message'       => $message,
+    //             'alert-type'    => $type
+    //         );
+    //     }
+    //     return redirect()->route('bbs.admin.booking.cart')->with($notification);
+    //     // return view('bbs.customer.booking.cart');
+    //     // return response()->json(['error' => $error, 'message' => $message]);
+    // }
 
     public function generateMatchServiceAvailability()
     {
@@ -337,6 +340,7 @@ class ServiceController extends Controller
             $op->reservation_limit = $request->reservation_limit;
             $op->max_slots = $request->slots_per_match;
             $op->available_slots = $request->slots_per_match;
+            $op->unit_price = $request->unit_price;
             $op->group_key = $request->group_key;
             $op->used_slots = $request->used_slots;
             $op->created_by = $user->id;
@@ -466,6 +470,7 @@ class ServiceController extends Controller
             $op->reservation_limit = $request->reservation_limit;
             $op->max_slots = $request->slots_per_match;
             $op->available_slots = $request->slots_per_match;
+            $op->unit_price = $request->unit_price;
             $op->used_slots = $request->used_slots;
             $op->group_key = $request->group_key;
             $op->updated_by = $user->id;

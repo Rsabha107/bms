@@ -117,7 +117,6 @@ class AuthenticatedSessionController extends Controller
 
         session()->forget('login_method');
         $microsoftLogoutUrl = Socialite::driver('microsoft')->getLogoutUrl(route('login')); // Replace 'azure' with your Microsoft Socialite driver name if different, and 'login' with your desired redirect URI after Microsoft logout.
-        appLog('Redirecting to Microsoft logout URL: ' . $microsoftLogoutUrl);
         return redirect($microsoftLogoutUrl);
 
         // return redirect('/');

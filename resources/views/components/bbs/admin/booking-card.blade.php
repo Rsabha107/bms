@@ -46,6 +46,8 @@
                             <th data-sortable="false" data-field="match_id" >Match</th>
                             <th data-sortable="false" data-field="service_id" ><?= get_label('service_title', 'Service') ?></th>
                             <th data-sortable="false" data-field="quantity" ><?= get_label('quantity', 'Quantity') ?></th>
+                            <th data-sortable="false" data-field="unit_price" ><?= get_label('unit_price', 'Unit Price') ?></th>
+                            <th data-sortable="false" data-field="total_price" ><?= get_label('total_price', 'Total Price') ?></th>
                             <th data-sortable="true" data-field="created_at" data-visible="false" ><?= get_label('created_at', 'Created at') ?></th>
                             <th data-sortable="true" data-field="updated_at" data-visible="false" ><?= get_label('updated_at', 'Updated at') ?></th>
                             <th data-field="actions" class="text-end"><?= get_label('actions', 'Actions') ?></th>

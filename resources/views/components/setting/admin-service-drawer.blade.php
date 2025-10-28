@@ -14,15 +14,6 @@
                     <div class="card-body">
 
                         <div class="row mb-3">
-
-                            {{-- <div class="text-center mb-3">
-                                <div class="mb-3 text-start">
-                                    <input type="file" name="file_name" class="dropify"
-                                        data-height="200"
-                                        data-default-file="{{ !empty($user->photo) ? url('storage/upload/profile_images/' . $user->photo) : url('upload/default.png') }}" />
-                        </div>
-                    </div> --}}
-
                             <div class="row mb-3">
                                 <div class="col-sm-6 col-md-12">
                                     <label class="form-label" for="add_menu_item_id">Menu Item</label>
@@ -53,24 +44,18 @@
                             </div>
 
                             <div class="row mb-3">
-                                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1" inputValue=""
+                                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1" inputValue=""
                                     name="slots_per_match" elementId="edit_slots_per_match" inputType="number"
                                     inputAttributes="" label="Slots Per Match" required="required" disabled="0" />
-                                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1" inputValue=""
+                                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1" inputValue=""
                                     name="reservation_limit" elementId="edit_reservation_limit" inputType="number"
                                     inputAttributes="" label="Reservation Limit" required="required" disabled="0" />
-                                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1" inputValue=""
+                                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1" inputValue=""
+                                    name="unit_price" elementId="edit_unit_price" inputType="number"
+                                    inputAttributes="" label="Unit Price" required="required" disabled="0" />
+                                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1" inputValue=""
                                     name="group_key" elementId="add_group_key" inputType="text" inputAttributes=""
                                     label="Group Key" required="" disabled="0" />
-                                {{-- <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1" inputValue="0"
-                            name="max_slots" elementId="add_max_slots" inputType="number" inputAttributes=""
-                            label="Max Slots" required="required" disabled="0" />
-                        <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1" inputValue="0"
-                            name="available_slots" elementId="add_available_slots" inputType="number" inputAttributes=""
-                            label="Available Slots" required="required" disabled="0" />
-                        <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1" inputValue="0"
-                            name="used_slots" elementId="add_used_slots" inputType="number" label="Used Slots" inputAttributes=""
-                            required="required" disabled="0" /> --}}
                             </div>
 
                             <div class="col-12 gy-3">

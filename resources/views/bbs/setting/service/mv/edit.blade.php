@@ -50,15 +50,14 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <x-formy.form_input class="col-sm-12 col-md-12 mb-3" floating="1" inputValue="{{ $service->title }}"
+                <x-formy.form_input class="col-sm-12 col-md-12 mb-3" floating="1" inputValue="{!! $service->title !!}"
                     name="title" elementId="add_title" inputType="text" inputAttributes="" label="title"
                     required="required" disabled="0" />
             </div>
             <div class="row mb-3">
-                <x-formy.form_input class="col-sm-12 col-md-12 mb-3" floating="1"
-                    inputValue="{{ $service->short_description }}" name="short_description"
-                    elementId="add_short_description" inputType="text" inputAttributes="" label="short_description"
-                    required="required" disabled="0" />
+                <x-formy.form_input class="col-sm-12 col-md-12 mb-3" floating="1" inputValue="{!! $service->short_description !!}"
+                    name="short_description" elementId="add_short_description" inputType="text" inputAttributes=""
+                    label="short_description" required="required" disabled="0" />
             </div>
             <div class="row mb-3">
                 <x-formy.form_text_editor class="col-sm-12 col-md-12 mb-3" inputValue="{!! $service->long_description !!}"
@@ -67,25 +66,19 @@
             </div>
 
             <div class="row mb-3">
-                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1"
+                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1"
                     inputValue="{{ $service->slots_per_match }}" name="slots_per_match" elementId="edit_slots_per_match"
                     inputType="number" inputAttributes="" label="Slots Per Match" required="required" disabled="0" />
-                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1"
+                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1"
                     inputValue="{{ $service->reservation_limit }}" name="reservation_limit"
                     elementId="edit_reservation_limit" inputType="number" inputAttributes="" label="Reservation Limit"
                     required="required" disabled="0" />
-                <x-formy.form_input class="col-sm-12 col-md-4 mb-3" floating="1"
-                    inputValue="{{ $service->group_key }}" name="group_key" elementId="edit_group_key"
-                    inputType="text" inputAttributes="" label="Group Key" required="" disabled="0" />
-                {{-- <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1" inputValue="{{ $service->max_slots }}"
-            name="max_slots" elementId="add_max_slots" inputType="number" inputAttributes="" label="Max Slots"
-            required="required" disabled="0" />
-        <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1"
-            inputValue="{{ $service->available_slots }}" name="available_slots" elementId="add_available_slots"
-            inputType="number" inputAttributes="" label="Available Slots" required="required" disabled="0" />
-        <x-formy.form_input class="col-sm-6 col-md-4 mb-3" floating="1"
-            inputValue="{{ $service->used_slots }}" name="used_slots" elementId="add_used_slots"
-            inputType="number" label="Used Slots" inputAttributes="" required="required" disabled="0" /> --}}
+                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1"
+                    inputValue="{{ $service->unit_price }}" name="unit_price" elementId="edit_unit_price" inputType="number"
+                    inputAttributes="" label="Unit Price" required="required" disabled="0" />
+                <x-formy.form_input class="col-sm-12 col-md-3 mb-3" floating="1"
+                    inputValue="{{ $service->group_key }}" name="group_key" elementId="edit_group_key" inputType="text"
+                    inputAttributes="" label="Group Key" required="" disabled="0" />
             </div>
 
             <div class="col-12 gy-3">
@@ -96,11 +89,6 @@
                             Cancel
                         </button>
                     </a>
-                    {{-- <button type="button" class="col-auto btn btn-phoenix-primary px-5"
-                        data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-dismiss="offcanvas" id="get_tinymce_content">
-                        tiny content
-                    </button> --}}
                     <div class="col-auto">
                         <button class="btn btn-primary px-5 px-sm-15" id="submit_btn">Save</button>
                     </div>

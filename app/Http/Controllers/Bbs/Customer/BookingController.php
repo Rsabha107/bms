@@ -141,6 +141,8 @@ class BookingController extends Controller
                 'match_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->match?->match_code . '</div>',
                 'service_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->service?->title . '</div>',
                 'quantity' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->quantity . '</div>',
+                'unit_price' => '<div class="align-middle text-wrap fs-9 ps-1">' . number_format($op->unit_price, 2) . '</div>',
+                'total_price' => '<div class="align-middle text-wrap fs-9 ps-1">' . number_format($op->quantity * $op->unit_price, 2) . '</div>',
                 // 'image' => '<div class="align-middle  fs-9 ps-3">' . $op->image . '</div>',
                 // 'status' => '<span class="badge badge-phoenix fs--2 ms-3 badge-phoenix-' . $venue->status->color . ' " style="cursor: pointer;" id="editDriverStatus" data-id="' . $venue->id . '" data-table="drivers_table"><span class="badge-label">' . $venue->status->title . '</span><span class="ms-1 uil-edit-alt" style="height:12.8px;width:12.8px;cursor: pointer;"></span></span>',
                 'actions' => $actions,
@@ -257,6 +259,8 @@ class BookingController extends Controller
         $event = Event::find(session()->get('EVENT_ID'));
         $venues = $event?->venues;
         $matches = Matches::all();
+        $mmc_studios = MmcSpace::where('space_type', 'studio')->get();
+        $mmc_confs = MmcSpace::where('space_type', 'conference')->get();
 
         $breadcrumb = [
             ['title' => 'Home', 'url' => route('home')],
@@ -266,7 +270,7 @@ class BookingController extends Controller
 
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'breadcrumb', 'venues', 'matches')
+            compact('services', 'menus', 'breadcrumb', 'venues', 'matches', 'mmc_studios', 'mmc_confs', 'selected_menu_display')
         );
     }
 

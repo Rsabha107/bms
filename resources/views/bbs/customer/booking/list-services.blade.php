@@ -87,6 +87,8 @@
                                 <div id="available_slots">
                                 </div>
                             </div>
+                            <p class="me-2 fs-9 fw-bold text-body text-body-emphasis mb-0">Price Per Day/Per Match:
+                                {{ $service->unit_price ?? 0 }} {{ $service->unit_price ? 'Є' : '' }}</p>
                             <hr class="my-3">
 
                             <div class="d-flex justify-content-center">
@@ -116,14 +118,16 @@
                                         </select>
                                     </div>
 
-                                    <div class="d-flex justify-content-between align-items-end">
+                                    <div class="d-flex justify-content-between align-items-end mb-3">
                                         <div class="d-flex flex-between-center">
                                             <input class="form-control text-center input-spin-none " style="width:50px;"
                                                 type="number" name="quantity" min="1" value="1" id="quantity"
                                                 max="{{ $service->available_slots }}" {{ $disabled }}>
+                                            {{-- <p class="me-2 ms-3 fs-9 fw-bold text-body text-body-emphasis mb-0">
+                                                {{ $service->unit_price }} Є</p> --}}
                                             <button class="btn btn-phoenix-success border-0 ms-3"
-                                                {{ $disabled }}>Reserve
-                                                Now</button>
+                                                {{ $disabled }}>Reserve Now
+                                            </button>
                                         </div>
                                     </div>
                                 </form>
@@ -185,6 +189,8 @@
                                 <div id="available_slots">
                                 </div>
                             </div>
+                            <p class="me-2 fs-9 fw-bold text-body text-body-emphasis mb-0">Price Per Day/Per Match:
+                                {{ $service->unit_price ?? 0 }} {{ $service->unit_price ? 'Є' : '' }}</p>
                             <hr class="my-3">
 
                             <div class="d-flex justify-content-center">
@@ -284,6 +290,8 @@
                                 <div id="available_slots">
                                 </div>
                             </div>
+                            <p class="me-2 fs-9 fw-bold text-body text-body-emphasis mb-0">Price Per Day/Per Match:
+                                {{ $service->unit_price ?? 0 }} {{ $service->unit_price ? 'Є' : '' }}</p>
                             <hr class="my-3">
 
                             <div class="d-flex justify-content-center">
