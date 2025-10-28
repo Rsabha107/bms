@@ -22,7 +22,7 @@
     </div>
 </div>
 
-<div class="offcanvas offcanvas-end offcanvas-global-modal in" id="offcanvas-add-booking-slot-modal" tabindex="-1"
+{{-- <div class="offcanvas offcanvas-end offcanvas-global-modal in" id="offcanvas-add-booking-slot-modal" tabindex="-1"
     aria-labelledby="offcanvasWithBackdropLabel">
     <a class="close-task-detail in" id="close-task-detail" style="display: block;" data-bs-dismiss="offcanvas">
         <span>
@@ -32,7 +32,7 @@
     <x-mds.admin.admin-booking-slot-drawer id="" formAction="{{ route('mds.setting.schedule.store') }}"
         formId="add_booking_slot_form" :events="$events" :venues="$venues" :rsps="$rsps" :schedules="$schedules"
         :globalYn="$global_yn" />
-</div>
+</div> --}}
 
 <div class="offcanvas offcanvas-end offcanvas-filter-modal in" id="scheduleFilterOffcanvas" tabindex="-1"
     aria-labelledby="offcanvasWithBackdropLabel">

@@ -55,31 +55,6 @@ class ServiceController extends Controller
         return view('bbs.customer.booking.list', compact('services'));
     }
 
-    // public function cart()
-    // {
-    //     $eventId = session()->get('EVENT_ID');
-
-    //     if (Auth::user()->hasRole('SuperAdmin') || Auth::user()->hasRole('Manager')) {
-    //         // SuperAdmin & Manager should see ALL bookings for the event
-    //         $bookings = BroadcastBooking::with('service')
-    //             ->where('event_id', $eventId)
-    //             ->get();
-
-    //         return view('bbs.admin.booking.cart', compact('bookings'));
-    //     } elseif (Auth::user()->hasRole('Customer')) {
-    //         // Customer should only see their own bookings for the event
-    //         $bookings = BroadcastBooking::with('service')
-    //             ->where('event_id', $eventId)
-    //             ->where('created_by', Auth::user()->id)
-    //             ->get();
-
-    //         return view('bbs.customer.booking.cart', compact('bookings'));
-    //     } else {
-    //         abort(403, 'Unauthorized');
-    //     }
-    // }
-
-
     public function switch($id = null)
     {
         if ($id) {
@@ -125,46 +100,6 @@ class ServiceController extends Controller
         $op = BroadcastService::findOrFail($id);
         return response()->json(['op' => $op]);
     }
-
-    // public function editStatus($id)
-    // {
-    //     //  dd('editTaskProgress');
-    //     $data = MdsDriver::find($id);
-    //     //dd($data);
-    //     $data_arr = [];
-
-    //     $data_arr[] = [
-    //         "id"        => $data->id,
-    //         "status_id"  => $data->status_id,
-    //     ];
-
-    //     $response = ["retData"  => $data_arr];
-    //     return response()->json($response);
-    // } // editStatus
-
-    // public function updateStatus(Request $request)
-    // {
-
-    //     $driver = MdsDriver::findOrFail($request->id);
-    //     $status_title = DriverStatus::findOrFail($request->status_id);
-
-    //     Log::info($status_title->title);
-    //     $driver->update([
-    //         'status_id' => $request->status_id,
-    //     ]);
-
-    //     $notification = array(
-    //         'message'       => 'Driver status updated successfully',
-    //         'alert-type'    => 'success'
-    //     );
-
-    //     return response()->json(['error' => false, 'message' => 'Driver Status updated successfully.', 'id' => $driver->id]);
-
-    //     // Toastr::success('Has been add successfully :)','Success');
-    //     // return redirect()->back()->with($notification);
-    //     // deleteEvent
-    // } //updateStatus
-
 
     public function list()
     {
@@ -277,6 +212,92 @@ class ServiceController extends Controller
         // return response()->json(['error' => $error, 'message' => $message]);
     }
 
+    public function generateMatchServiceAvailability()
+    {
+        $event = Event::find(session()->get('EVENT_ID'));
+
+        foreach ($event->matches as $match) {
+            foreach ($event->services as $service) {
+                // get the variation exceptions for this service and venue
+                $variation = ServiceVariation::where('event_id', session()->get('EVENT_ID'))
+                    ->where('service_id', $service->id)
+                    ->where('venue_id', $match->venue_id)
+                    ->first();
+
+                if ($variation) {
+                    Log::info('Found variation for service ' . $service->id . ' at venue ' . $match->venue_id);
+                    $max_slots = $variation->max_slots;
+                    $reservation_limit = $variation->limit_slots;
+                } else {
+                    Log::info('No variation found for service ' . $service->id . ' at venue ' . $match->venue_id . '. Using default service settings.');
+                    $max_slots = $service->slots_per_match;
+                    $reservation_limit = $service->reservation_limit;
+                }
+
+                MatchServiceAvailability::firstOrCreate(
+                    [
+                        // search criteria
+                        'match_id' => $match->id,
+                        'service_id' => $service->id,
+                    ],
+                    // values to set if not found
+                    [
+                        'max_slots' => $max_slots,
+                        // 'max_slots' => $service->slots_per_match,
+                        // 'available_slots' => $service->slots_per_match,
+                        'available_slots' => $max_slots,
+                        'used_slots' => 0,
+                        'group_key' => $service->group_key,
+                        // 'reservation_limit' => $service->reservation_limit,
+                        'reservation_limit' => $reservation_limit,
+                    ]
+                );
+            }
+            
+            foreach ($event->mmcServices as $service) {
+                // get the variation exceptions for this service and venue
+                $variation = ServiceVariation::where('event_id', session()->get('EVENT_ID'))
+                    ->where('service_id', $service->id)
+                    ->where('venue_id', $match->venue_id)
+                    ->first();
+
+                if ($variation) {
+                    Log::info('Found variation for service ' . $service->id . ' at venue ' . $match->venue_id);
+                    $max_slots = $variation->max_slots;
+                    $reservation_limit = $variation->limit_slots;
+                } else {
+                    Log::info('No variation found for service ' . $service->id . ' at venue ' . $match->venue_id . '. Using default service settings.');
+                    $max_slots = $service->slots_per_match;
+                    $reservation_limit = $service->reservation_limit;
+                }
+
+                MatchServiceAvailability::firstOrCreate(
+                    [
+                        // search criteria
+                        'match_id' => $match->id,
+                        'service_id' => $service->id,
+                    ],
+                    // values to set if not found
+                    [
+                        'max_slots' => $max_slots,
+                        // 'max_slots' => $service->slots_per_match,
+                        // 'available_slots' => $service->slots_per_match,
+                        'available_slots' => $max_slots,
+                        'used_slots' => 0,
+                        'group_key' => $service->group_key,
+                        // 'reservation_limit' => $service->reservation_limit,
+                        'reservation_limit' => $reservation_limit,
+                    ]
+                );
+            }
+        }
+
+        $error = false;
+        $message = 'Match Service Availability generated successfully.';
+
+        return response()->json(['error' => $error, 'message' => $message]);
+    } // generateMatchServiceAvailability
+
     public function store(Request $request)
     {
         //
@@ -325,6 +346,43 @@ class ServiceController extends Controller
 
             foreach ($event->matches as $match) {
                 foreach ($event->services as $service) {
+                    // get the variation exceptions for this service and venue
+                    $variation = ServiceVariation::where('event_id', session()->get('EVENT_ID'))
+                        ->where('service_id', $service->id)
+                        ->where('venue_id', $match->venue_id)
+                        ->first();
+
+                    if ($variation) {
+                        Log::info('Found variation for service ' . $service->id . ' at venue ' . $match->venue_id);
+                        $max_slots = $variation->max_slots;
+                        $reservation_limit = $variation->limit_slots;
+                    } else {
+                        Log::info('No variation found for service ' . $service->id . ' at venue ' . $match->venue_id . '. Using default service settings.');
+                        $max_slots = $service->slots_per_match;
+                        $reservation_limit = $service->reservation_limit;
+                    }
+
+                    MatchServiceAvailability::firstOrCreate(
+                        [
+                            // search criteria
+                            'match_id' => $match->id,
+                            'service_id' => $service->id,
+                        ],
+                        // values to set if not found
+                        [
+                            'max_slots' => $max_slots,
+                            // 'max_slots' => $service->slots_per_match,
+                            // 'available_slots' => $service->slots_per_match,
+                            'available_slots' => $max_slots,
+                            'used_slots' => 0,
+                            'group_key' => $service->group_key,
+                            // 'reservation_limit' => $service->reservation_limit,
+                            'reservation_limit' => $reservation_limit,
+                        ]
+                    );
+                }
+
+                foreach ($event->mmcServices as $service) {
                     // get the variation exceptions for this service and venue
                     $variation = ServiceVariation::where('event_id', session()->get('EVENT_ID'))
                         ->where('service_id', $service->id)

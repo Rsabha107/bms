@@ -105,7 +105,7 @@
     <main class="main" id="top">
 
         {{-- <x-mds.nav.topmenu /> --}}
-        <x-mds.admin.sidemenu />
+        {{-- <x-mds.admin.sidemenu /> --}}
         @include('mds.admin.body.header')
 
         {{-- // start of content --}}

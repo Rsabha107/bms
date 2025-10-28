@@ -140,6 +140,7 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::post('bbs/setting/service/update', 'update')->name('bbs.setting.service.update');
             Route::delete('/bbs/setting/service/delete/{id}',  'delete')->name('bbs.setting.service.delete');
             Route::post('/bbs/setting/service/store', 'store')->name('bbs.setting.service.store');
+            Route::get('/bbs-match-service-availability', 'generateMatchServiceAvailability')->name('bbs.setting.match.service.availability.generate');
             Route::get('/bbs/setting/service/mv/get/{id}', 'getView')->name('bbs.setting.service.get.mv');
             Route::get('bbs/admin/booking/{id}/switch', 'switch')->name('bbs.admin.booking.switch');
         });
@@ -210,6 +211,8 @@ Route::group(['middleware' => 'prevent-back-history'], function () {
             Route::get('bbs/customer/booking/{id}/switch', 'switch')->name('bbs.customer.booking.switch');
             Route::get('/get-service-details', 'getServiceAvailability')->name('bbs.get.service.details');
             Route::get('/get-matches-by-venue', 'getMatchesByVenue')->name('bbs.get.match.by.venue');
+            Route::get('/get-matches-by-studio', 'getMatchesByStudio')->name('bbs.get.match.by.studio');
+            Route::get('/get-matches-by-conference', 'getMatchesByConference')->name('bbs.get.match.by.conference');
 
             Route::delete('/bbs/customer/booking/delete/{id}', 'delete')->name('bbs.customer.booking.delete');
 

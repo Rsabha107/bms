@@ -20,7 +20,7 @@ class BroadcastBooking extends Model
     public static function boot()
     {
         parent::boot();
-            static::creating(function ($model) {
+        static::creating(function ($model) {
 
             DB::transaction(function () use ($model) {
                 Log::info('Generating ref_number for Profile');
@@ -36,7 +36,7 @@ class BroadcastBooking extends Model
                 // $venue_short_name = $venue->short_name ?? 'VENUE';
                 // $location_name = $location->title ?? 'LOCATION';
 
-                $model->ref_number = 'MPBS-'. str_pad($last_number, 10, '0', STR_PAD_LEFT);
+                $model->ref_number = 'MPBS-' . str_pad($last_number, 10, '0', STR_PAD_LEFT);
             });
         });
     }
@@ -50,6 +50,12 @@ class BroadcastBooking extends Model
     {
         return $this->belongsTo(Venue::class, 'venue_id');
     }
+
+    public function studio()
+    {
+        return $this->belongsTo(MmcSpace::class, 'venue_id');
+    }
+
     public function event()
     {
         return $this->belongsTo(Event::class, 'event_id');
@@ -62,5 +68,4 @@ class BroadcastBooking extends Model
     {
         return $this->belongsTo(Matches::class, 'match_id');
     }
-
 }

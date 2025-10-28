@@ -21,6 +21,8 @@ use App\Models\Bbs\Event;
 use App\Models\Bbs\Matches;
 use App\Models\Bbs\MatchServiceAvailability;
 use App\Models\Bbs\MenuItem;
+use App\Models\Bbs\MmcSpace;
+use App\Models\Bbs\MmcSpaceMatch;
 use App\Models\Mds\DeliveryZone;
 use App\Models\Mds\MdsDriver;
 use App\Models\Mds\MdsEvent;
@@ -59,10 +61,11 @@ class BookingController extends Controller
         // Log::info('menus: ' . json_encode($menus, JSON_PRETTY_PRINT));
         $venues = Venue::all();
         $matches = Matches::all();
+        $mmc_spaces = MmcSpace::all();
 
         return view(
             'bbs.customer.booking.list',
-            compact('services', 'menus', 'venues', 'matches')
+            compact('services', 'menus', 'venues', 'matches', 'mmc_spaces')
         );
     }
 
@@ -133,7 +136,8 @@ class BookingController extends Controller
                 'organization_name' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->organization_name . '</div>',
                 'created_by' => '<div class="align-middle text-wrap fs-9 ps-3 ps-1">' . $op->created_by_user?->name . '</div>',
                 'event_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->event?->name . '</div>',
-                'venue_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->venue?->title . '</div>',
+                'venue_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . ($op->venue?->title ?? $op->studio?->title) . '</div>',
+                // 'venue_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->venue?->title . '</div>',
                 'match_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->match?->match_code . '</div>',
                 'service_id' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->service?->title . '</div>',
                 'quantity' => '<div class="align-middle text-wrap fs-9 ps-1">' . $op->quantity . '</div>',
@@ -201,6 +205,9 @@ class BookingController extends Controller
         $event = Event::find(session()->get('EVENT_ID'));
         $venues = $event?->venues;
         $matches = Matches::all();
+        $mmc_studios = MmcSpace::where('space_type', 'studio')->get();
+        $mmc_confs = MmcSpace::where('space_type', 'conference')->get();
+
 
         session()->put($selected_menu_db->link, 'active');
         if ($selected_menu_db->parent) {
@@ -211,7 +218,7 @@ class BookingController extends Controller
 
         return view(
             'bbs.customer.booking.list-services',
-            compact('services', 'menus', 'breadcrumb', 'venues', 'matches')
+            compact('services', 'menus', 'breadcrumb', 'venues', 'matches', 'mmc_studios', 'mmc_confs')
         );
     }
 
@@ -219,6 +226,22 @@ class BookingController extends Controller
     {
         Log::info('BookingController::getMatchesByVenue request: ' . json_encode($request->all()));
         $matches = Matches::where('venue_id', $request->venue_id)->get();
+
+        return response()->json(['matches' => $matches]);
+    }
+
+    function getMatchesByStudio(Request $request)
+    {
+        Log::info('BookingController::getMatchesByStudio request: ' . json_encode($request->all()));
+        $matches = MmcSpaceMatch::where('mmc_space_id', $request->studio_id)->get();
+
+        return response()->json(['matches' => $matches]);
+    }
+
+    function getMatchesByConference(Request $request)
+    {
+        Log::info('BookingController::getMatchesByConference request: ' . json_encode($request->all()));
+        $matches = MmcSpaceMatch::where('mmc_space_id', $request->conference_id)->get();
 
         return response()->json(['matches' => $matches]);
     }
@@ -346,13 +369,18 @@ class BookingController extends Controller
 
         $rules = [
             'service_id' => 'required',
-            'quantity' => 'required',
-            'venue_id' => 'required',
-            'match_id' => 'required',
-            // 'x' => 'required',
+            'quantity'   => 'required',
+            'venue_id'   => 'required_without:studio_id',
+            'studio_id'  => 'required_without:venue_id',
+            'match_id'   => 'required',
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages =  [
+            'venue_id.required_without' => 'Either venue or studio must be selected.',
+            'studio_id.required_without' => 'Either studio or venue must be selected.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             // Log::info($validator->errors()->all(':message'));
@@ -397,7 +425,8 @@ class BookingController extends Controller
                 $booking->unit_price = intval($request->unit_price);
                 $booking->total_price = intval($request->quantity) * intval($request->unit_price);
                 $booking->quantity = intval($request->quantity);
-                $booking->venue_id = $request->venue_id;
+                // $booking->venue_id = $request->venue_id;
+                $booking->venue_id = $request->venue_id ?? $request->studio_id;
                 $booking->match_id = $request->match_id;
                 $booking->created_by = $user->id;
                 $booking->updated_by = $user->id;

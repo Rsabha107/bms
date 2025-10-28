@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Event extends Model
 {
     use HasFactory;
-    protected $table="events";
+    protected $table = "events";
     protected $guarded = [];
 
 
@@ -30,6 +30,11 @@ class Event extends Model
 
     public function services()
     {
-        return $this->hasMany(BroadcastService::class, 'event_id');
+        return $this->hasMany(BroadcastService::class, 'event_id')->whereNull('service_type');
+    }
+
+    public function mmcServices()
+    {
+        return $this->hasMany(BroadcastService::class, 'event_id')->where('service_type', 'like', 'mmc%');
     }
 }

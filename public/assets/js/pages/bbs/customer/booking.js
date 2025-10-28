@@ -53,6 +53,51 @@
 
 // });
 
+// exceptions
+// studios and conference rooms are exceptions where matches are linked to studios
+// and not venues. So we need to fetch matches based on studio selection
+$("body").on("change", "#select_mmc", function (e) {
+    console.log("inside select_mmc");
+    var studio_conf_id = $(this).val();
+    var card = $(this).closest(".service-card");
+    var match_select = card.find('select[name="match_id"]');
+    match_select.empty(); // Clear previous options
+    match_select.append('<option value="">Select Match</option>'); // Add default option
+    console.log("studio_conf_id", studio_conf_id);
+    $.ajax({
+        url: "/get-matches-by-studio",
+        type: "GET",
+        data: {
+            studio_id: studio_conf_id,
+        },
+        dataType: "json",
+        success: function (response) {
+            console.log("response", response);
+            if (response.matches && response.matches.length > 0) {
+                response.matches.forEach(function (match) {
+                    match_select.append(
+                        '<option value="' +
+                            match.match_id +
+                            '">' +
+                            match.match_code +
+                            " ( " +
+                            match.match_date +
+                            " )</option>"
+                    );
+                });
+            } else {
+                match_select.append(
+                    '<option value="">No matches available</option>'
+                );
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+        },
+    });
+});
+
 $("body").on("change", "#select_venue_id", function (e) {
     console.log("inside select_venue_id");
     var venue_id = $(this).val();
@@ -101,7 +146,7 @@ $("body").on("change", "#select_match_id", function (e) {
 
     const card = $(this).closest(".service-card");
 
-    var venue_id = card.find('select[name="venue_id"]').val();
+    // var venue_id = card.find('select[name="venue_id"]').val();
     var service_id = card.find('input[name="service_id"]').val();
     var available_slots_div = card.find("#available_slots");
     var quantity_input = card.find('input[name="quantity"]');
@@ -112,14 +157,14 @@ $("body").on("change", "#select_match_id", function (e) {
     // var venue_id = $("#select_venue_id").val();
     // var service_id = $("#service_id").val();
     console.log("match_id", match_id);
-    console.log("venue_id", venue_id);
+    // console.log("venue_id", venue_id);
     console.log("service_id", service_id);
     $.ajax({
         url: "/get-service-details",
         type: "GET",
         data: {
             match_id: match_id,
-            venue_id: venue_id,
+            // venue_id: venue_id,
             service_id: service_id,
         },
         dataType: "json",
